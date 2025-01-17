@@ -4567,6 +4567,10 @@ fun! s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
     return
   endif
 
+  if w:netrw_liststyle != s:TREELIST
+    call cursor(w:netrw_bannercnt, 1)
+  endif
+
   " NetrwBrowseChgDir; save options and initialize {{{3
   call s:SavePosn(s:netrw_posn)
   NetrwKeepj call s:NetrwOptionsSave("s:")
