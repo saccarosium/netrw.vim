@@ -15,7 +15,7 @@ if &cp || exists("g:loaded_netrwPlugin")
     finish
 endif
 
-let g:loaded_netrwPlugin = "v174"
+let g:loaded_netrwPlugin = "v175"
 
 " Commands Launch/URL: {{{
 

@@ -1,4 +1,4 @@
-*netrw.txt* 
+*netrw.txt*
 
 	    ------------------------------------------------
 	    NETRW REFERENCE MANUAL      by Charles E.Cambell
@@ -3411,7 +3411,6 @@ Example: Clear netrw's marked file list via a mapping on gu >
 10. Problems and Fixes					*netrw-problems* {{{1
 
 	(This section is likely to grow as I get feedback)
-	(also see |netrw-debug|)
 								*netrw-p1*
 	P1. I use Windows, and my network browsing with ftp doesn't sort by {{{2
 	    time or size!  -or-  The remote system is a Windows server; why
