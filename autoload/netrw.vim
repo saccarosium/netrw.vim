@@ -5043,7 +5043,7 @@ endfun
 
 function! netrw#Open(file) abort
     if has('nvim')
-        call v:lua.require'netrw'.open(a:file)
+        call luaeval('vim.ui.open(_A[1]) and nil', [a:file])
     else
         call netrw#Launch(s:viewer() .. ' ' .. shellescape(a:file, 1))
     endif
