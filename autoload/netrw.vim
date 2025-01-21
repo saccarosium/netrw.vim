@@ -591,6 +591,21 @@ endif
 "  Netrw Utility Functions: {{{1
 " ==============================
 
+let s:slash = &shellslash ? '/' : '\'
+function! s:JoinPath(...)
+    let path = ""
+
+    for arg in a:000
+        if empty(path)
+            let path = arg
+        else
+            let path .= s:slash . arg
+        endif
+    endfor
+
+    return path
+endfunction
+
 " ---------------------------------------------------------------------
 " netrw#BalloonHelp: {{{2
 
@@ -5515,41 +5530,32 @@ endfun
 
 " ---------------------------------------------------------------------
 "  s:NetrwHome: this function determines a "home" for saving bookmarks and history {{{2
-fun! s:NetrwHome()
-  if exists("g:netrw_home")
-    let home= expand(g:netrw_home)
+function! s:NetrwHome()
+  if has('nvim')
+    let home = s:JoinPath(stdpath('state'), 'netrw')
+  elseif exists("g:netrw_home")
+    let home = expand(g:netrw_home)
   else
-    " go to vim plugin home
-    for home in split(&rtp,',') + ['']
-      if isdirectory(s:NetrwFile(home)) && filewritable(s:NetrwFile(home)) | break | endif
-      let basehome= substitute(home,'[/\\]\.vim$','','')
-      if isdirectory(s:NetrwFile(basehome)) && filewritable(s:NetrwFile(basehome))
-        let home= basehome."/.vim"
-        break
-      endif
-    endfor
-    if home == ""
-      " just pick the first directory
-      let home= substitute(&rtp,',.*$','','')
-    endif
-    if has("win32")
-      let home= substitute(home,'/','\\','g')
-    endif
+    let home = expand("$MYVIMDIR")->substitute("/$", "", "")
   endif
+
   " insure that the home directory exists
   if g:netrw_dirhistmax > 0 && !isdirectory(s:NetrwFile(home))
-    "   call Decho("insure that the home<".home."> directory exists")
     if exists("g:netrw_mkdir")
-      "    call Decho("call system(".g:netrw_mkdir." ".s:ShellEscape(s:NetrwFile(home)).")")
       call system(g:netrw_mkdir." ".s:ShellEscape(s:NetrwFile(home)))
     else
-      "    call Decho("mkdir(".home.")")
       call mkdir(home)
     endif
   endif
-  let g:netrw_home= home
+
+  " Normalize directory if on Windows
+  if has("win32")
+    let home = substitute(home, '/', '\\', 'g')
+  endif
+
+  let g:netrw_home = home
   return home
-endfun
+endfunction
 
 " ---------------------------------------------------------------------
 " s:NetrwLeftmouse: handles the <leftmouse> when in a netrw browsing window {{{2
