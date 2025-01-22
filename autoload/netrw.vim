@@ -591,6 +591,27 @@ endif
 "  Netrw Utility Functions: {{{1
 " ==============================
 
+let s:deprecation_msgs = []
+function! netrw#Deprecate(name, alternative, version)
+    " If running on neovim use vim.deprecate
+    if has('nvim')
+        call luaeval('vim.deprecate(unpack(_A)) and nil', [a:name, a:alternative, a:version, "netrw", v:false])
+        return
+    endif
+
+    " If we did notify for something only do it once
+    if s:deprecation_msgs->index(a:name) >= 0
+        return
+    endif
+
+    echohl WarningMsg
+    echomsg printf('%s is deprecated, use %s instead.', a:name, a:alternative)
+    echomsg printf('Feature will be removed in netrw %s', a:version)
+    echohl None
+
+    call add(s:deprecation_msgs, a:name)
+endfunction
+
 let s:slash = &shellslash ? '/' : '\'
 function! s:JoinPath(...)
     let path = ""
