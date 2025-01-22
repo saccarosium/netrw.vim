@@ -1169,52 +1169,6 @@ fun! netrw#Lexplore(count,rightside,...)
 endfun
 
 " ---------------------------------------------------------------------
-" netrw#Clean: remove netrw {{{2
-" supports :NetrwClean  -- remove netrw from first directory on runtimepath
-"          :NetrwClean! -- remove netrw from all directories on runtimepath
-fun! netrw#Clean(sys)
-  "  call Dfunc("netrw#Clean(sys=".a:sys.")")
-
-  if a:sys
-    let choice= confirm("Remove personal and system copies of netrw?","&Yes\n&No")
-  else
-    let choice= confirm("Remove personal copy of netrw?","&Yes\n&No")
-  endif
-  "  call Decho("choice=".choice,'~'.expand("<slnum>"))
-  let diddel= 0
-  let diddir= ""
-
-  if choice == 1
-    for dir in split(&rtp,',')
-      if filereadable(dir."/plugin/netrwPlugin.vim")
-        "     call Decho("removing netrw-related files from ".dir,'~'.expand("<slnum>"))
-        if s:NetrwDelete(dir."/plugin/netrwPlugin.vim")        |call netrw#ErrorMsg(1,"unable to remove ".dir."/plugin/netrwPlugin.vim",55)        |endif
-        if s:NetrwDelete(dir."/autoload/netrwFileHandlers.vim")|call netrw#ErrorMsg(1,"unable to remove ".dir."/autoload/netrwFileHandlers.vim",55)|endif
-        if s:NetrwDelete(dir."/autoload/netrwSettings.vim")    |call netrw#ErrorMsg(1,"unable to remove ".dir."/autoload/netrwSettings.vim",55)    |endif
-        if s:NetrwDelete(dir."/autoload/netrw.vim")            |call netrw#ErrorMsg(1,"unable to remove ".dir."/autoload/netrw.vim",55)            |endif
-        if s:NetrwDelete(dir."/syntax/netrw.vim")              |call netrw#ErrorMsg(1,"unable to remove ".dir."/syntax/netrw.vim",55)              |endif
-        if s:NetrwDelete(dir."/syntax/netrwlist.vim")          |call netrw#ErrorMsg(1,"unable to remove ".dir."/syntax/netrwlist.vim",55)          |endif
-        let diddir= dir
-        let diddel= diddel + 1
-        if !a:sys|break|endif
-      endif
-    endfor
-  endif
-
-  echohl WarningMsg
-  if diddel == 0
-    echomsg "netrw is either not installed or not removable"
-  elseif diddel == 1
-    echomsg "removed one copy of netrw from <".diddir.">"
-  else
-    echomsg "removed ".diddel." copies of netrw"
-  endif
-  echohl None
-
-  "  call Dret("netrw#Clean")
-endfun
-
-" ---------------------------------------------------------------------
 " netrw#MakeTgt: make a target out of the directory name provided {{{2
 fun! netrw#MakeTgt(dname)
   "  call Dfunc("netrw#MakeTgt(dname<".a:dname.">)")

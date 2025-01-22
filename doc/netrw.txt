@@ -1140,7 +1140,6 @@ QUICK REFERENCE: MAPS				*netrw-browse-maps* {{{2
 
 				*netrw-quickcom* *netrw-quickcoms*
 QUICK REFERENCE: COMMANDS	*netrw-explore-cmds* *netrw-browse-cmds* {{{2
-     :NetrwClean[!]............................................|netrw-clean|
      :NetrwSettings............................................|netrw-settings|
      :Ntree....................................................|netrw-ntree|
      :Explore[!]  [dir] Explore directory of current file......|netrw-explore|
@@ -1452,19 +1451,6 @@ With a "dirname", the specified directory name is used.
 The "gn" map will take the word below the cursor and use that for
 changing the top of the tree listing.
 
-
-NETRW CLEAN					*netrw-clean* *:NetrwClean* {{{2
-
-With :NetrwClean one may easily remove netrw from one's home directory;
-more precisely, from the first directory on your |'runtimepath'|.
-
-With :NetrwClean!, netrw will attempt to remove netrw from all directories on
-your |'runtimepath'|.  Of course, you have to have write/delete permissions
-correct to do this.
-
-With either form of the command, netrw will first ask for confirmation
-that the removal is in fact what you want to do.  If netrw doesn't have
-permission to remove a file, it will issue an error message.
 
 CUSTOMIZING BROWSING WITH A SPECIAL HANDLER	*netrw-x* *netrw-handler* {{{2
 
