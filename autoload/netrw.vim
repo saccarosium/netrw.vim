@@ -4887,126 +4887,6 @@ fun! s:NetrwBrowseUpDir(islocal)
   endif
 endfun
 
-func s:redir()
-  " set up redirection (avoids browser messages)
-  " by default if not set, g:netrw_suppress_gx_mesg is true
-  if get(g:, 'netrw_suppress_gx_mesg', 1)
-    if &srr =~# "%s"
-      return printf(&srr, has("win32") ? "nul" : "/dev/null")
-    else
-      return &srr .. (has("win32") ? "nul" : "/dev/null")
-    endif
-  endif
-  return ''
-endfunc
-
-if has('unix')
-  if has('win32unix')
-    " Cygwin provides cygstart
-    if executable('cygstart')
-      fun! netrw#Launch(args)
-        exe 'silent ! cygstart --hide' a:args s:redir() | redraw!
-      endfun
-    elseif !empty($MSYSTEM) && executable('start')
-      " MSYS2/Git Bash comes by default without cygstart; see
-      " https://www.msys2.org/wiki/How-does-MSYS2-differ-from-Cygwin
-      " Instead it provides /usr/bin/start script running `cmd.exe //c start`
-      " Adding "" //b` sets void title, hides cmd window and blocks path conversion
-      " of /b to \b\ " by MSYS2; see https://www.msys2.org/docs/filesystem-paths/
-      fun! netrw#Launch(args)
-        exe 'silent !start "" //b' a:args s:redir() | redraw!
-      endfun
-    else
-      " imitate /usr/bin/start script for other environments and hope for the best
-      fun! netrw#Launch(args)
-        exe 'silent !cmd //c start "" //b' a:args s:redir() | redraw!
-      endfun
-    endif
-  elseif exists('$WSL_DISTRO_NAME') " use cmd.exe to start GUI apps in WSL
-    fun! netrw#Launch(args)
-      let args = a:args
-      exe 'silent !' ..
-            \ ((args =~? '\v<\f+\.(exe|com|bat|cmd)>') ?
-            \ 'cmd.exe /c start /b ' .. args :
-            \ 'nohup ' .. args .. ' ' .. s:redir() .. ' &')
-            \ | redraw!
-    endfun
-  else
-    fun! netrw#Launch(args)
-      exe ':silent ! nohup' a:args s:redir() (has('gui_running') ? '' : '&') | redraw!
-    endfun
-  endif
-elseif has('win32')
-  fun! netrw#Launch(args)
-    exe 'silent !' .. (&shell =~? '\<cmd\.exe\>' ? '' : 'cmd.exe /c')
-          \ 'start "" /b' a:args s:redir() | redraw!
-  endfun
-else
-  fun! netrw#Launch(dummy)
-    echom 'No common launcher found'
-  endfun
-endif
-
-" Git Bash
-if has('win32unix')
-  " (cyg)start suffices
-  let s:os_viewer = ''
-" Windows / WSL
-elseif executable('explorer.exe')
-  let s:os_viewer = 'explorer.exe'
-" Linux / BSD
-elseif executable('xdg-open')
-  let s:os_viewer = 'xdg-open'
-" MacOS
-elseif executable('open')
-  let s:os_viewer = 'open'
-endif
-
-fun! s:viewer()
-  " g:netrw_browsex_viewer could be a string of program + its arguments,
-  " test if first argument is executable
-  if exists('g:netrw_browsex_viewer') && executable(split(g:netrw_browsex_viewer)[0])
-    " extract any viewing options.  Assumes that they're set apart by spaces.
-    "   call Decho("extract any viewing options from g:netrw_browsex_viewer<".g:netrw_browsex_viewer.">",'~'.expand("<slnum>"))
-    if g:netrw_browsex_viewer =~ '\s'
-      let viewer  = substitute(g:netrw_browsex_viewer,'\s.*$','','')
-      let viewopt = substitute(g:netrw_browsex_viewer,'^\S\+\s*','','')." "
-      let oviewer = ''
-      let cnt     = 1
-      while !executable(viewer) && viewer != oviewer
-        let viewer  = substitute(g:netrw_browsex_viewer,'^\(\(^\S\+\s\+\)\{'.cnt.'}\S\+\)\(.*\)$','\1','')
-        let viewopt = substitute(g:netrw_browsex_viewer,'^\(\(^\S\+\s\+\)\{'.cnt.'}\S\+\)\(.*\)$','\3','')." "
-        let cnt     = cnt + 1
-        let oviewer = viewer
-        "     call Decho("!exe: viewer<".viewer.">  viewopt<".viewopt.">",'~'.expand("<slnum>"))
-      endwhile
-    else
-      let viewer  = g:netrw_browsex_viewer
-      let viewopt = ""
-    endif
-    "   call Decho("viewer<".viewer.">  viewopt<".viewopt.">",'~'.expand("<slnum>"))
-    return viewer .. ' ' .. viewopt
-  else
-    if !exists('s:os_viewer')
-      call netrw#ErrorMsg(s:ERROR,"No program to open this path found. See :help Open for more information.",106)
-    else
-      return s:os_viewer
-    endif
-  endif
-endfun
-
-function! netrw#Open(file) abort
-    if has('nvim')
-        call luaeval('vim.ui.open(_A[1]) and nil', [a:file])
-    else
-        call netrw#Launch(s:viewer() .. ' ' .. shellescape(a:file, 1))
-    endif
-endfunction
-
-if !exists('g:netrw_regex_url')
-  let g:netrw_regex_url = '\%(\%(http\|ftp\|irc\)s\?\|file\)://\S\{-}'
-endif
-
 " ---------------------------------------------------------------------
 " netrw#BrowseX:  (implements "x" and "gx") executes a special "viewer" script or program for the {{{2
 "              given filename; typically this means given their extension.
@@ -5087,7 +4967,7 @@ fun! netrw#BrowseX(fname,remote)
     endif
   endif
 
-  call netrw#Open(fname)
+  call netrw#own#Open(fname)
 
   " cleanup: remove temporary file,
   "          delete current buffer if success with handler,
@@ -5109,46 +4989,6 @@ fun! netrw#BrowseX(fname,remote)
   let @@ = ykeep
   let &aw= awkeep
 endfun
-
-" ---------------------------------------------------------------------
-" netrw#GX: gets word under cursor for gx support {{{2
-"           See also: netrw#BrowseXVis
-"                     netrw#BrowseX
-fun! netrw#GX()
-  "  call Dfunc("netrw#GX()")
-  if &ft == "netrw"
-    let fname= s:NetrwGetWord()
-  else
-    let fname= exists("g:netrw_gx")? expand(g:netrw_gx) : s:GetURL()
-  endif
-  "  call Dret("netrw#GX <".fname.">")
-  return fname
-endfun
-
-fun! s:GetURL() abort
-  let URL = ''
-  if exists('*Netrw_get_URL_' .. &filetype)
-    let URL = call('Netrw_get_URL_' .. &filetype, [])
-  endif
-  if !empty(URL) | return URL | endif
-  " URLs end in letter, digit or forward slash
-  let URL = matchstr(expand("<cWORD>"), '\<' .. g:netrw_regex_url .. '\ze[^A-Za-z0-9/]*$')
-  if !empty(URL) | return URL | endif
-
-  " Is it a file in the current work dir ...
-  let file = expand("<cfile>")
-  if filereadable(file) | return file | endif
-  " ... or in that of the current buffer?
-  let path = fnamemodify(expand('%'), ':p')
-  if isdirectory(path)
-    let dir = path
-  elseif filereadable(path)
-    let dir = fnamemodify(path, ':h')
-  endif
-  if exists('dir') && filereadable(dir..'/'..file) | return dir..'/'..file | endif
-
-  return ''
-endf
 
 " ---------------------------------------------------------------------
 " netrw#BrowseXVis: used by gx in visual mode to select a file for browsing {{{2
@@ -5471,7 +5311,7 @@ endfun
 "  s:NetrwHome: this function determines a "home" for saving bookmarks and history {{{2
 function! s:NetrwHome()
   if has('nvim')
-    let home = netrw#private#JoinPath(stdpath('state'), 'netrw')
+    let home = netrw#own#JoinPath(stdpath('state'), 'netrw')
   elseif exists("g:netrw_home")
     let home = expand(g:netrw_home)
   else
@@ -11805,6 +11645,21 @@ fun! s:UserMaps(islocal,funcname)
   endif
 endfun
 
+" Deprecated: {{{
+
+function! netrw#Launch(args)
+    call netrw#own#Deprecate('netrw#Launch', 'v180', {'vim': 'dist#vim9#Launch', 'nvim': 'vim.system'})
+    if !has('nvim')
+        call dist#vim9#Launch(args)
+    endif
+endfunction
+
+function! netrw#Open(file)
+    call netrw#own#Deprecate('netrw#Open', 'v180', {'vim': 'dist#vim9#Open', 'nvim': 'vim.ui.open'})
+    call netrw#own#Open(a:file)
+endfunction
+
+" }}}
 " ==========================
 " Settings Restoration: {{{1
 " ==========================

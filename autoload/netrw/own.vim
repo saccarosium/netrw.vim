@@ -42,4 +42,12 @@ function! netrw#own#JoinPath(...)
     return path
 endfunction
 
+function! netrw#own#Open(file) abort
+    if has('nvim')
+        call luaeval('vim.ui.open(_A[1]) and nil', [a:file])
+    else
+        call dist#vim9#Open(a:file)
+    endif
+endfunction
+
 " vim:ts=8 sts=4 sw=4 et fdm=marker
