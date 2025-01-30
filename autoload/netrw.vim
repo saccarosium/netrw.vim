@@ -4893,7 +4893,7 @@ fun! s:NetrwBrowseUpDir(islocal)
 endfun
 
 " ---------------------------------------------------------------------
-" netrw#BrowseX:  (implements "x" and "gx") executes a special "viewer" script or program for the {{{2
+" netrw#BrowseX:  (implements "x") executes a special "viewer" script or program for the {{{2
 "              given filename; typically this means given their extension.
 "              0=local, 1=remote
 fun! netrw#BrowseX(fname,remote)
@@ -4993,17 +4993,6 @@ fun! netrw#BrowseX(fname,remote)
   call winrestview(screenposn)
   let @@ = ykeep
   let &aw= awkeep
-endfun
-
-" ---------------------------------------------------------------------
-" netrw#BrowseXVis: used by gx in visual mode to select a file for browsing {{{2
-fun! netrw#BrowseXVis()
-  let dict={}
-  let dict.a=[getreg('a'), getregtype('a')]
-  norm! gv"ay
-  let gxfile= @a
-  call s:RestoreRegister(dict)
-  call netrw#BrowseX(gxfile,netrw#CheckIfRemote(gxfile))
 endfun
 
 " ---------------------------------------------------------------------
@@ -5316,7 +5305,7 @@ endfun
 "  s:NetrwHome: this function determines a "home" for saving bookmarks and history {{{2
 function! s:NetrwHome()
   if has('nvim')
-    let home = netrw#own#JoinPath(stdpath('state'), 'netrw')
+    let home = netrw#own#PathJoin(stdpath('state'), 'netrw')
   elseif exists("g:netrw_home")
     let home = expand(g:netrw_home)
   else
@@ -6350,7 +6339,7 @@ fun! s:NetrwMarkFileCopy(islocal,...)
     endif
 
     " copy marked files while within the same directory (ie. allow renaming)
-    if s:StripTrailingSlash(simplify(s:netrwmftgt)) == s:StripTrailingSlash(simplify(b:netrw_curdir))
+    if simplify(s:netrwmftgt) ==# simplify(b:netrw_curdir)
       if len(s:netrwmarkfilelist_{bufnr('%')}) == 1
         " only one marked file
         "     call Decho("case: only one marked file",'~'.expand("<slnum>"))
@@ -10484,13 +10473,6 @@ fun! netrw#WinPath(path)
 endfun
 
 " ---------------------------------------------------------------------
-" s:StripTrailingSlash: removes trailing slashes from a path {{{2
-fun! s:StripTrailingSlash(path)
-  " remove trailing slash
-  return substitute(a:path, '[/\\]$', '', 'g')
-endfun
-
-" ---------------------------------------------------------------------
 " s:NetrwBadd: adds marked files to buffer list or vice versa {{{2
 "              cb : bl2mf=0  add marked files to buffer list
 "              cB : bl2mf=1  use bufferlist to mark files
@@ -10611,9 +10593,9 @@ fun! s:FileReadable(fname)
   "  call Dfunc("s:FileReadable(fname<".a:fname.">)")
 
   if g:netrw_cygwin
-    let ret= filereadable(s:NetrwFile(substitute(a:fname,g:netrw_cygdrive.'/\(.\)','\1:/','')))
+    let ret = filereadable(s:NetrwFile(substitute(a:fname,g:netrw_cygdrive.'/\(.\)','\1:/','')))
   else
-    let ret= filereadable(s:NetrwFile(a:fname))
+    let ret = filereadable(s:NetrwFile(a:fname))
   endif
 
   "  call Dret("s:FileReadable ".ret)
