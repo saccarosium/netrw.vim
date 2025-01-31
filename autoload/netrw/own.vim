@@ -9,7 +9,7 @@ function! netrw#own#Deprecate(name, version, alternatives)
     " If running on neovim use vim.deprecate
     if has('nvim')
         let s:alternative = a:alternatives->get('nvim', v:null)
-        call luaeval('vim.deprecate(unpack(_A)) and nil', [a:name, s:alternative, a:version, "netrw", v:false])
+        call v:lua.vim.deprecate(a:name, s:alternative, a:version, "netrw", v:false)
         return
     endif
 
