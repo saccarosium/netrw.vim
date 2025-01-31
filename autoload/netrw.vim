@@ -45,109 +45,104 @@ setl cpo&vim
 "          netrw#ErrorMsg(s:NOTE | s:WARNING | s:ERROR,["message1","message2",...],error-number)
 "          (this function can optionally take a list of messages)
 "  Dec 2, 2019 : max errnum currently is 106
-fun! netrw#ErrorMsg(level,msg,errnum)
-  "  call Dfunc("netrw#ErrorMsg(level=".a:level." msg<".a:msg."> errnum=".a:errnum.") g:netrw_use_errorwindow=".g:netrw_use_errorwindow)
+function! netrw#ErrorMsg(level, msg, errnum)
+    if a:level < g:netrw_errorlvl
+        return
+    endif
 
-  if a:level < g:netrw_errorlvl
-    "   call Dret("netrw#ErrorMsg : suppressing level=".a:level." since g:netrw_errorlvl=".g:netrw_errorlvl)
-    return
-  endif
-
-  if a:level == 1
-    let level= "**warning** (netrw) "
-  elseif a:level == 2
-    let level= "**error** (netrw) "
-  else
-    let level= "**note** (netrw) "
-  endif
-  "  call Decho("level=".level,'~'.expand("<slnum>"))
-
-  if g:netrw_use_errorwindow == 2 && exists("*popup_atcursor")
-    " use popup window
-    if type(a:msg) == 3
-      let msg = [level]+a:msg
+    if a:level == 1
+        let level = "**warning** (netrw) "
+    elseif a:level == 2
+        let level = "**error** (netrw) "
     else
-      let msg= level.a:msg
+        let level = "**note** (netrw) "
     endif
-    let s:popuperr_id  = popup_atcursor(msg,{})
-    let s:popuperr_text= ""
-  elseif g:netrw_use_errorwindow
-    " (default) netrw creates a one-line window to show error/warning
-    " messages (reliably displayed)
 
-    " record current window number
-    let s:winBeforeErr= winnr()
-    "   call Decho("s:winBeforeErr=".s:winBeforeErr,'~'.expand("<slnum>"))
+    if g:netrw_use_errorwindow == 2 && exists("*popup_atcursor")
+        " use popup window
+        if type(a:msg) == 3
+            let msg = [level]+a:msg
+        else
+            let msg = level.a:msg
+        endif
+        let s:popuperr_id = popup_atcursor(msg, {})
+        let s:popuperr_text = ""
+    elseif has('nvim')
+        call v:lua.vim.notify(level . a:msg, a:level + 2)
+    elseif g:netrw_use_errorwindow
+        " (default) netrw creates a one-line window to show error/warning
+        " messages (reliably displayed)
 
-    " getting messages out reliably is just plain difficult!
-    " This attempt splits the current window, creating a one line window.
-    if bufexists("NetrwMessage") && bufwinnr("NetrwMessage") > 0
-      "    call Decho("write to NetrwMessage buffer",'~'.expand("<slnum>"))
-      exe bufwinnr("NetrwMessage")."wincmd w"
-      "    call Decho("setl ma noro",'~'.expand("<slnum>"))
-      setl ma noro
-      if type(a:msg) == 3
-        for msg in a:msg
-          NetrwKeepj call setline(line("$")+1,level.msg)
-        endfor
-      else
-        NetrwKeepj call setline(line("$")+1,level.a:msg)
-      endif
-      NetrwKeepj $
+        " record current window number
+        let s:winBeforeErr = winnr()
+        "   call Decho("s:winBeforeErr=".s:winBeforeErr,'~'.expand("<slnum>"))
+
+        " getting messages out reliably is just plain difficult!
+        " This attempt splits the current window, creating a one line window.
+        if bufexists("NetrwMessage") && bufwinnr("NetrwMessage") > 0
+            "    call Decho("write to NetrwMessage buffer",'~'.expand("<slnum>"))
+            exe bufwinnr("NetrwMessage")."wincmd w"
+            "    call Decho("setl ma noro",'~'.expand("<slnum>"))
+            setl ma noro
+            if type(a:msg) == 3
+                for msg in a:msg
+                    NetrwKeepj call setline(line("$")+1,level.msg)
+                endfor
+            else
+                NetrwKeepj call setline(line("$")+1,level.a:msg)
+            endif
+            NetrwKeepj $
+        else
+            "    call Decho("create a NetrwMessage buffer window",'~'.expand("<slnum>"))
+            bo 1split
+            sil! call s:NetrwEnew()
+            sil! NetrwKeepj call s:NetrwOptionsSafe(1)
+            setl bt=nofile
+            NetrwKeepj file NetrwMessage
+            "    call Decho("setl ma noro",'~'.expand("<slnum>"))
+            setl ma noro
+            if type(a:msg) == 3
+                for msg in a:msg
+                    NetrwKeepj call setline(line("$")+1,level.msg)
+                endfor
+            else
+                NetrwKeepj call setline(line("$"),level.a:msg)
+            endif
+            NetrwKeepj $
+        endif
+        "   call Decho("wrote msg<".level.a:msg."> to NetrwMessage win#".winnr(),'~'.expand("<slnum>"))
+        if &fo !~ '[ta]'
+            syn clear
+            syn match netrwMesgNote     "^\*\*note\*\*"
+            syn match netrwMesgWarning  "^\*\*warning\*\*"
+            syn match netrwMesgError    "^\*\*error\*\*"
+            hi link netrwMesgWarning WarningMsg
+            hi link netrwMesgError   Error
+        endif
+        "   call Decho("setl noma ro bh=wipe",'~'.expand("<slnum>"))
+        setl ro nomod noma bh=wipe
+
     else
-      "    call Decho("create a NetrwMessage buffer window",'~'.expand("<slnum>"))
-      bo 1split
-      sil! call s:NetrwEnew()
-      sil! NetrwKeepj call s:NetrwOptionsSafe(1)
-      setl bt=nofile
-      NetrwKeepj file NetrwMessage
-      "    call Decho("setl ma noro",'~'.expand("<slnum>"))
-      setl ma noro
-      if type(a:msg) == 3
-        for msg in a:msg
-          NetrwKeepj call setline(line("$")+1,level.msg)
-        endfor
-      else
-        NetrwKeepj call setline(line("$"),level.a:msg)
-      endif
-      NetrwKeepj $
-    endif
-    "   call Decho("wrote msg<".level.a:msg."> to NetrwMessage win#".winnr(),'~'.expand("<slnum>"))
-    if &fo !~ '[ta]'
-      syn clear
-      syn match netrwMesgNote     "^\*\*note\*\*"
-      syn match netrwMesgWarning  "^\*\*warning\*\*"
-      syn match netrwMesgError    "^\*\*error\*\*"
-      hi link netrwMesgWarning WarningMsg
-      hi link netrwMesgError   Error
-    endif
-    "   call Decho("setl noma ro bh=wipe",'~'.expand("<slnum>"))
-    setl ro nomod noma bh=wipe
+        " (optional) netrw will show messages using echomsg.  Even if the
+        " message doesn't appear, at least it'll be recallable via :messages
+        "   redraw!
+        if a:level == s:WARNING
+            echohl WarningMsg
+        elseif a:level == s:ERROR
+            echohl Error
+        endif
 
-  else
-    " (optional) netrw will show messages using echomsg.  Even if the
-    " message doesn't appear, at least it'll be recallable via :messages
-    "   redraw!
-    if a:level == s:WARNING
-      echohl WarningMsg
-    elseif a:level == s:ERROR
-      echohl Error
+        if type(a:msg) == 3
+            for msg in a:msg
+                unsilent echomsg level.msg
+            endfor
+        else
+            unsilent echomsg level.a:msg
+        endif
+
+        echohl None
     endif
-
-    if type(a:msg) == 3
-      for msg in a:msg
-        unsilent echomsg level.msg
-      endfor
-    else
-      unsilent echomsg level.a:msg
-    endif
-
-    "   call Decho("echomsg ***netrw*** ".a:msg,'~'.expand("<slnum>"))
-    echohl None
-  endif
-
-  "  call Dret("netrw#ErrorMsg")
-endfun
+endfunction
 
 " ---------------------------------------------------------------------
 " s:NetrwInit: initializes variables if they haven't been defined {{{2
