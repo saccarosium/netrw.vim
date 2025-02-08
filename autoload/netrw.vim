@@ -10319,17 +10319,22 @@ function! s:NetrwLocalRmFile(path, fname, all)
         endif
     endif
 
-    let ret = 0
     if !dir && (all || empty(ok))
-        let ret = s:NetrwDelete(rmfile)
+        " This works because delete return 0 if successful
+        if s:NetrwDelete(rmfile)
+            call netrw#ErrorMsg(s:ERROR, printf("unable to delete <%s>!", rmfile), 103)
+        else
+            " Remove file only if there are no pending changes
+            execute printf('silent! bwipeout %s', rmfile)
+        endif
+
     elseif dir && (all || empty(ok))
         " Remove trailing /
         let rmfile = substitute(rmfile, '[\/]$', '', 'e')
-        let ret = delete(rmfile, "rf")
-    endif
+        if delete(rmfile, "rf")
+            call netrw#ErrorMsg(s:ERROR, printf("unable to delete directory <%s>!", rmfile), 103)
+        endif
 
-    if ret
-        call netrw#ErrorMsg(s:ERROR, printf("unable to delete <%s>!", rmfile), 103)
     endif
 
     return ok
