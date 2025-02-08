@@ -10285,67 +10285,50 @@ endfun
 " ---------------------------------------------------------------------
 " s:NetrwLocalRmFile: remove file fname given the path {{{2
 "                     Give confirmation prompt unless all==1
-fun! s:NetrwLocalRmFile(path,fname,all)
-  "  call Dfunc("s:NetrwLocalRmFile(path<".a:path."> fname<".a:fname."> all=".a:all)
+function! s:NetrwLocalRmFile(path, fname, all)
+    let all = a:all
+    let ok = ""
+    let dir = 0
+    NetrwKeepj norm! 0
+    let rmfile = s:NetrwFile(s:ComposePath(a:path, escape(a:fname, '\\')))->fnamemodify(':.')
 
-  let all= a:all
-  let ok = ""
-  NetrwKeepj norm! 0
-  let rmfile= s:NetrwFile(s:ComposePath(a:path,escape(a:fname, '\\')))
-  "  call Decho("rmfile<".rmfile.">",'~'.expand("<slnum>"))
+    " if not a directory
+    if rmfile !~ '^"' && (rmfile =~ '@$' || rmfile !~ '[\/]$')
+        let msg = "Confirm deletion of file <%s> [{y(es)},n(o),a(ll)]: "
+    else
+        let msg = "Confirm *recursive* deletion of directory <%s> [{y(es)},n(o),a(ll)]: "
+        let dir = 1
+    endif
 
-  if rmfile !~ '^"' && (rmfile =~ '@$' || rmfile !~ '[\/]$')
-    " attempt to remove file
-    "   call Decho("attempt to remove file<".rmfile.">",'~'.expand("<slnum>"))
+    " Ask confirmation
     if !all
-      echohl Statement
-      call inputsave()
-      let ok= input("Confirm deletion of file <".rmfile."> ","[{y(es)},n(o),a(ll),q(uit)] ")
-      call inputrestore()
-      echohl NONE
-      if ok == ""
-        let ok="no"
-      endif
-      "    call Decho("response: ok<".ok.">",'~'.expand("<slnum>"))
-      let ok= substitute(ok,'\[{y(es)},n(o),a(ll),q(uit)]\s*','','e')
-      "    call Decho("response: ok<".ok."> (after sub)",'~'.expand("<slnum>"))
-      if ok =~# '^a\%[ll]$'
-        let all= 1
-      endif
+        echohl Statement
+        call inputsave()
+        let ok = input(printf(msg, rmfile))
+        call inputrestore()
+        echohl NONE
+        if ok =~# '^a\%[ll]$' || ok =~# '^y\%[es]$'
+            let all = 1
+        else
+            let ok = 'no'
+        endif
     endif
 
-    if all || ok =~# '^y\%[es]$' || ok == ""
-      let ret= s:NetrwDelete(rmfile)
-      "    call Decho("errcode=".v:shell_error." ret=".ret,'~'.expand("<slnum>"))
+    let ret = 0
+    if !dir && (all || empty(ok))
+        let ret = s:NetrwDelete(rmfile)
+    elseif dir && (all || empty(ok))
+        " Remove trailing /
+        let rmfile = substitute(rmfile, '[\/]$', '', 'e')
+        let ret = delete(rmfile, "rf")
     endif
 
-  else
-    " attempt to remove directory
-    if !all
-      echohl Statement
-      call inputsave()
-      let ok= input("Confirm *recursive* deletion of directory <".rmfile."> ","[{y(es)},n(o),a(ll),q(uit)] ")
-      call inputrestore()
-      let ok= substitute(ok,'\[{y(es)},n(o),a(ll),q(uit)]\s*','','e')
-      if ok == ""
-        let ok="no"
-      endif
-      if ok =~# '^a\%[ll]$'
-        let all= 1
-      endif
+    if ret
+        call netrw#ErrorMsg(s:ERROR, printf("unable to delete <%s>!", rmfile), 103)
     endif
-    let rmfile= substitute(rmfile,'[\/]$','','e')
 
-    if all || ok =~# '^y\%[es]$' || ok == ""
-      if delete(rmfile,"rf")
-        call netrw#ErrorMsg(s:ERROR,"unable to delete directory <".rmfile.">!",103)
-      endif
-    endif
-  endif
-
-  "  call Dret("s:NetrwLocalRmFile ".ok)
-  return ok
-endfun
+    return ok
+endfunction
 
 " =====================================================================
 " Support Functions: {{{1
