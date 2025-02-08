@@ -10221,66 +10221,71 @@ endfun
 
 " ---------------------------------------------------------------------
 " s:NetrwLocalRm: {{{2
-fun! s:NetrwLocalRm(path) range
-  if !exists("w:netrw_bannercnt")
-    let w:netrw_bannercnt= b:netrw_bannercnt
-  endif
+function! s:NetrwLocalRm(path) range
+    if !exists("w:netrw_bannercnt")
+        let w:netrw_bannercnt = b:netrw_bannercnt
+    endif
 
-  " preparation for removing multiple files/directories
-  let ykeep = @@
-  let ret   = 0
-  let all   = 0
-  let svpos = winsaveview()
+    " preparation for removing multiple files/directories
+    let ykeep = @@
+    let ret = 0
+    let all = 0
+    let svpos = winsaveview()
 
-  if exists("s:netrwmarkfilelist_{bufnr('%')}")
-    " remove all marked files
-    for fname in s:netrwmarkfilelist_{bufnr("%")}
-      let ok= s:NetrwLocalRmFile(a:path,fname,all)
-      if ok =~# 'q\%[uit]' || ok == "no"
-        break
-      elseif ok =~# '^a\%[ll]$'
-        let all= 1
-      endif
-    endfor
-    call s:NetrwUnMarkFile(1)
+    if exists("s:netrwmarkfilelist_{bufnr('%')}")
+        " remove all marked files
+        for fname in s:netrwmarkfilelist_{bufnr("%")}
+            let ok = s:NetrwLocalRmFile(a:path, fname, all)
+            if ok =~# '^a\%[ll]$'
+                let all = 1
+            elseif ok =~# "n\%[o]"
+                break
+            endif
+        endfor
+        call s:NetrwUnMarkFile(1)
 
-  else
-    " remove (multiple) files and directories
+    else
+        " remove (multiple) files and directories
 
-    let keepsol= &l:sol
-    setl nosol
-    let ctr = a:firstline
-    while ctr <= a:lastline
-      exe "NetrwKeepj ".ctr
+        let keepsol = &l:sol
+        setl nosol
+        let ctr = a:firstline
+        while ctr <= a:lastline
+            exe "NetrwKeepj ".ctr
 
-      " sanity checks
-      if line(".") < w:netrw_bannercnt
-        let ctr= ctr + 1
-        continue
-      endif
-      let curword= s:NetrwGetWord()
-      if curword == "./" || curword == "../"
-        let ctr= ctr + 1
-        continue
-      endif
-      let ok= s:NetrwLocalRmFile(a:path,curword,all)
-      if ok =~# 'q\%[uit]' || ok == "no"
-        break
-      elseif ok =~# '^a\%[ll]$'
-        let all= 1
-      endif
-      let ctr= ctr + 1
-    endwhile
-    let &l:sol= keepsol
-  endif
+            " sanity checks
+            if line(".") < w:netrw_bannercnt
+                let ctr = ctr + 1
+                continue
+            endif
 
-  " refresh the directory
-  if bufname("%") != "NetrwMessage"
-    NetrwKeepj call s:NetrwRefresh(1,s:NetrwBrowseChgDir(1,'./',0))
-    NetrwKeepj call winrestview(svpos)
-  endif
-  let @@= ykeep
-endfun
+            let curword = s:NetrwGetWord()
+            if curword == "./" || curword == "../"
+                let ctr = ctr + 1
+                continue
+            endif
+
+            let ok = s:NetrwLocalRmFile(a:path, curword, all)
+            if ok =~# '^a\%[ll]$'
+                let all = 1
+            elseif ok =~# "n\%[o]"
+                break
+            endif
+
+            let ctr = ctr + 1
+        endwhile
+
+        let &l:sol = keepsol
+    endif
+
+    " refresh the directory
+    if bufname("%") != "NetrwMessage"
+        NetrwKeepj call s:NetrwRefresh(1, s:NetrwBrowseChgDir(1, './', 0))
+        NetrwKeepj call winrestview(svpos)
+    endif
+
+    let @@= ykeep
+endfunction
 
 " ---------------------------------------------------------------------
 " s:NetrwLocalRmFile: remove file fname given the path {{{2
@@ -11603,7 +11608,7 @@ fun! s:UserMaps(islocal,funcname)
   endif
 endfun
 
-" Deprecated: {{{
+" Deprecated: {{{1
 
 function! netrw#Launch(args)
     call netrw#own#Deprecate('netrw#Launch', 'v180', {'vim': 'dist#vim9#Launch', 'nvim': 'vim.system'})
@@ -11618,14 +11623,11 @@ function! netrw#Open(file)
 endfunction
 
 " }}}
-" ==========================
 " Settings Restoration: {{{1
 " ==========================
 let &cpo= s:keepcpo
 unlet s:keepcpo
 
-" ===============
-" Modelines: {{{1
-" ===============
+" }}}
 
 " vim:ts=8 sts=4 sw=4 et fdm=marker
