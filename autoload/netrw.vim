@@ -10832,31 +10832,24 @@ endfun
 "           Uses Steve Hall's idea to insure that Windows paths stay
 "           acceptable.  No effect on Unix paths.
 "  Examples of use:  let result= s:NetrwDelete(path)
-fun! s:NetrwDelete(path)
-  "  call Dfunc("s:NetrwDelete(path<".a:path.">)")
+function! s:NetrwDelete(path)
+    let path = netrw#WinPath(a:path)
 
-  let path = netrw#WinPath(a:path)
-  if !g:netrw_cygwin && has("win32")
-    if exists("+shellslash")
-      let sskeep= &shellslash
-      setl noshellslash
-      let result      = delete(path)
-      let &shellslash = sskeep
+    if !g:netrw_cygwin && has("win32") && exists("+shellslash")
+        let sskeep = &shellslash
+        setl noshellslash
+        let result = delete(path)
+        let &shellslash = sskeep
     else
-      "    call Decho("exe let result= ".a:cmd."('".path."')",'~'.expand("<slnum>"))
-      let result= delete(path)
+        let result = delete(path)
     endif
-  else
-    "   call Decho("let result= delete(".path.")",'~'.expand("<slnum>"))
-    let result= delete(path)
-  endif
-  if result < 0
-    NetrwKeepj call netrw#ErrorMsg(s:WARNING,"delete(".path.") failed!",71)
-  endif
 
-  "  call Dret("s:NetrwDelete ".result)
-  return result
-endfun
+    if result < 0
+        NetrwKeepj call netrw#ErrorMsg(s:WARNING, "delete(".path.") failed!", 71)
+    endif
+
+    return result
+endfunction
 
 " ---------------------------------------------------------------------
 " s:NetrwBufRemover: removes a buffer that: {{{2s
