@@ -1,0 +1,109 @@
+Execute (Enter dummy directory):
+  :cd .testenv/dummy
+
+Before (Enter netrw):
+  :Explore
+  call vader#assert#equal(&ft, 'netrw')
+
+Execute (Nop to check buffer):
+
+Expect netrw (Check if file exist):
+  " ============================================================================
+  " Netrw Directory Listing                                        (netrw v176)
+  "   /home/sacca/.local/share/nvim/site/pack/paqs/start/netrw.vim/.testenv/dummy
+  "   Sorted by      name
+  "   Sort sequence: [\/]$,\<core\%(\.\d\+\)\=\>,\.h$,\.c$,\.cpp$,\~\=\*$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$
+  "   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+  " ==============================================================================
+  ../
+  ./
+
+Do (Toggle Banner):
+  I
+
+Expect netrw (Banner should be gone):
+  ../
+  ./
+
+Execute (Create dummy files):
+  call writefile(["a"], "a.c", "a")
+  call writefile(["bbb"], "b.b", "a")
+  call writefile(["cc"], "c.a", "a")
+  execute "normal \<C-l>"
+
+Expect netrw (Check if file were created):
+  ../
+  ./
+  a.c
+  b.b
+  c.a
+
+Do (Toggle Banner):
+  I
+
+Do (Sorted by time):
+  s
+
+Expect netrw (Check if file are sorted by time):
+  " ============================================================================
+  " Netrw Directory Listing                                        (netrw v176)
+  "   /home/sacca/.local/share/nvim/site/pack/paqs/start/netrw.vim/.testenv/dummy
+  "   Sorted by time
+  "   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+  " ==============================================================================
+  ../
+  ./
+  a.c
+  b.b
+  c.a
+
+Do (Sorted by size):
+  s
+
+Expect netrw (Check if file are sorted by size):
+  " ============================================================================
+  " Netrw Directory Listing                                        (netrw v176)
+  "   /home/sacca/.local/share/nvim/site/pack/paqs/start/netrw.vim/.testenv/dummy
+  "   Sorted by size
+  "   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+  " ==============================================================================
+  ../
+  ./
+  a.c
+  c.a
+  b.b
+
+Do (Sorted by exten):
+  s
+
+Expect netrw (Check if file are sorted by exten):
+  " ============================================================================
+  " Netrw Directory Listing                                        (netrw v176)
+  "   /home/sacca/.local/share/nvim/site/pack/paqs/start/netrw.vim/.testenv/dummy
+  "   Sorted by exten
+  "   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+  " ==============================================================================
+  ../
+  ./
+  c.a
+  b.b
+  a.c
+
+Do (Reset banner and sorted by):
+  Is
+
+Do (Change listing to 'wide listing'):
+  ii
+
+Expect netrw (Check if listingstyle is 'wide listing'):
+  ../   ./    a.c   b.b   c.a
+
+Do (Change listing to 'wide listing'):
+  i
+
+Expect netrw (Check if listingstyle is 'tree listing'):
+  ../
+  dummy/
+  | a.c
+  | b.b
+  | c.a

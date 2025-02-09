@@ -1,1 +1,6 @@
-set runtimepath+=.packs/vader.vim
+execute 'set runtimepath^=' . expand('$PWD')
+execute 'set runtimepath^=' . expand('$PWD/.testenv/plugins/*')
+
+set noswapfile
+
+let g:netrw_home = expand('$PWD') . '/.testenv'
