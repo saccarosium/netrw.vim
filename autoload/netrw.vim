@@ -518,11 +518,9 @@ call s:NetrwInit("g:netrw_sort_by"       , "name") " alternatives: date         
 call s:NetrwInit("g:netrw_sort_options"  , "")
 call s:NetrwInit("g:netrw_sort_direction", "normal") " alternative: reverse  (z y x ...)
 if !exists("g:netrw_sort_sequence")
-  if has("unix")
-    let g:netrw_sort_sequence= '[\/]$,\<core\%(\.\d\+\)\=\>,\.h$,\.c$,\.cpp$,\~\=\*$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$'
-  else
-    let g:netrw_sort_sequence= '[\/]$,\.h$,\.c$,\.cpp$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$'
-  endif
+    let g:netrw_sort_sequence = !empty(&suffixes)
+                \ ? printf('[\/]$,*,\%(%s\)[*@]\=$', &suffixes->split(',')->map('escape(v:val, ".*$~")')->join('\|'))
+                \ : '[\/]$,*'
 endif
 call s:NetrwInit("g:netrw_special_syntax"   , 0)
 call s:NetrwInit("g:netrw_ssh_browse_reject", '^total\s\+\d\+$')

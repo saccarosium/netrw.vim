@@ -12,7 +12,7 @@ Expect netrw (Check if file exist):
   " Netrw Directory Listing                                        (netrw v176)
   "   /home/sacca/.local/share/nvim/site/pack/paqs/start/netrw.vim/.testenv/dummy
   "   Sorted by      name
-  "   Sort sequence: [\/]$,\<core\%(\.\d\+\)\=\>,\.h$,\.c$,\.cpp$,\~\=\*$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$
+  "   Sort sequence: [\/]$,*,\(\.bak\|\~\|\.o\|\.h\|\.info\|\.swp\|\.obj\)[*@]\=$
   "   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
   " ==============================================================================
   ../
