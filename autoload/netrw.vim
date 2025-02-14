@@ -1211,7 +1211,7 @@ fun! netrw#Obtain(islocal,fname,...)
     " obtain a file from local b:netrw_curdir to (local) tgtdir
     "   call Decho("obtain a file from local ".b:netrw_curdir." to ".tgtdir,'~'.expand("<slnum>"))
     if exists("b:netrw_curdir") && getcwd() != b:netrw_curdir
-      let topath= s:ComposePath(tgtdir,"")
+      let topath = netrw#fs#ComposePath(tgtdir,"")
       if has("win32")
         " transfer files one at time
         "     call Decho("transfer files one at a time",'~'.expand("<slnum>"))
@@ -3816,7 +3816,7 @@ fun! s:NetrwFile(fname)
       "     "" call Decho("windows+full path: isdirectory(".fname.")",'~'.expand("<slnum>"))
       else
         " windows, relative path given
-        let ret= s:ComposePath(b:netrw_curdir,fname)
+        let ret= netrw#fs#ComposePath(b:netrw_curdir,fname)
         "     "" call Decho("windows+rltv path: isdirectory(".fname.")",'~'.expand("<slnum>"))
       endif
 
@@ -3826,7 +3826,7 @@ fun! s:NetrwFile(fname)
     "    "" call Decho("unix+full path: isdirectory(".fname.")",'~'.expand("<slnum>"))
     else
       " not windows, relative path given
-      let ret= s:ComposePath(b:netrw_curdir,fname)
+      let ret= netrw#fs#ComposePath(b:netrw_curdir,fname)
       "    "" call Decho("unix+rltv path: isdirectory(".fname.")",'~'.expand("<slnum>"))
     endif
   else
@@ -3865,7 +3865,7 @@ fun! s:NetrwFileInfo(islocal,fname)
       "     call Decho("#2: echo system(/bin/ls -lsad ".s:ShellEscape(b:netrw_curdir).")",'~'.expand("<slnum>"))
 
       elseif exists("b:netrw_curdir")
-        echo system("/bin/ls ".lsopt." ".s:ShellEscape(s:ComposePath(b:netrw_curdir,a:fname)))
+        echo system("/bin/ls ".lsopt." ".s:ShellEscape(netrw#fs#ComposePath(b:netrw_curdir,a:fname)))
       "      call Decho("#3: echo system(/bin/ls -lsad ".s:ShellEscape(b:netrw_curdir.a:fname).")",'~'.expand("<slnum>"))
 
       else
@@ -4556,7 +4556,7 @@ fun! s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
     let dirname= dirname.'/'
   endif
 
-  if newdir !~ dirpat && !(a:islocal && isdirectory(s:NetrwFile(s:ComposePath(dirname,newdir))))
+  if newdir !~ dirpat && !(a:islocal && isdirectory(s:NetrwFile(netrw#fs#ComposePath(dirname,newdir))))
     " ------------------------------
     " NetrwBrowseChgDir: edit a file {{{3
     " ------------------------------
@@ -4573,7 +4573,7 @@ fun! s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
     elseif newdir =~ '^\(/\|\a:\)'
       let dirname= newdir
     else
-      let dirname= s:ComposePath(dirname,newdir)
+      let dirname= netrw#fs#ComposePath(dirname,newdir)
     endif
     " this lets netrw#BrowseX avoid the edit
     if a:0 < 1
@@ -4794,7 +4794,7 @@ fun! s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
     " ----------------------------------------
     " NetrwBrowseChgDir: Go down one directory {{{3
     " ----------------------------------------
-    let dirname    = s:ComposePath(dirname,newdir)
+    let dirname    = netrw#fs#ComposePath(dirname,newdir)
     NetrwKeepj call s:SetRexDir(a:islocal,dirname)
     norm! m`
   endif
@@ -5151,7 +5151,7 @@ endfun
 " ---------------------------------------------------------------------
 " s:NetrwGlob: does glob() if local, remote listing otherwise {{{2
 "     direntry: this is the name of the directory.  Will be fnameescape'd to prevent wildcard handling by glob()
-"     expr    : this is the expression to follow the directory.  Will use s:ComposePath()
+"     expr    : this is the expression to follow the directory.  Will use netrw#fs#ComposePath()
 "     pare    =1: remove the current directory from the resulting glob() filelist
 "             =0: leave  the current directory   in the resulting glob() filelist
 fun! s:NetrwGlob(direntry,expr,pare)
@@ -5171,7 +5171,7 @@ fun! s:NetrwGlob(direntry,expr,pare)
     endif
     let w:netrw_liststyle= keep_liststyle
   else
-    let path= s:ComposePath(fnameescape(a:direntry), a:expr)
+    let path= netrw#fs#ComposePath(fnameescape(a:direntry), a:expr)
     if has("win32")
       " escape [ so it is not detected as wildcard character, see :h wildcard
       let path= substitute(path, '[', '[[]', 'g')
@@ -6163,10 +6163,10 @@ fun! s:NetrwMarkFile(islocal,fname)
 
   " handle global markfilelist
   if exists("s:netrwmarkfilelist")
-    let dname= s:ComposePath(b:netrw_curdir,a:fname)
+    let dname= netrw#fs#ComposePath(b:netrw_curdir,a:fname)
     if index(s:netrwmarkfilelist,dname) == -1
       " append new filename to global markfilelist
-      call add(s:netrwmarkfilelist,s:ComposePath(b:netrw_curdir,a:fname))
+      call add(s:netrwmarkfilelist,netrw#fs#ComposePath(b:netrw_curdir,a:fname))
     "    call Decho("append filename<".a:fname."> to global s:markfilelist<".string(s:netrwmarkfilelist).">",'~'.expand("<slnum>"))
     else
       " remove new filename from global markfilelist
@@ -6182,7 +6182,7 @@ fun! s:NetrwMarkFile(islocal,fname)
   else
     " initialize new global-directory markfilelist
     let s:netrwmarkfilelist= []
-    call add(s:netrwmarkfilelist,s:ComposePath(b:netrw_curdir,a:fname))
+    call add(s:netrwmarkfilelist,netrw#fs#ComposePath(b:netrw_curdir,a:fname))
     "   call Decho("init s:netrwmarkfilelist<".string(s:netrwmarkfilelist).">",'~'.expand("<slnum>"))
   endif
 
@@ -6267,7 +6267,7 @@ fun! s:NetrwMarkFileCompress(islocal)
         let exe= netrw#WinPath(exe)
         if a:islocal
           if g:netrw_keepdir
-            let fname= s:ShellEscape(s:ComposePath(curdir,fname))
+            let fname= s:ShellEscape(netrw#fs#ComposePath(curdir,fname))
           endif
           call system(exe." ".fname)
           if v:shell_error
@@ -6285,7 +6285,7 @@ fun! s:NetrwMarkFileCompress(islocal)
         unlet exe
       elseif a:islocal
         " fname not a compressed file, so compress it
-        call system(netrw#WinPath(g:netrw_compress)." ".s:ShellEscape(s:ComposePath(b:netrw_curdir,fname)))
+        call system(netrw#WinPath(g:netrw_compress)." ".s:ShellEscape(netrw#fs#ComposePath(b:netrw_curdir,fname)))
         if v:shell_error
           call netrw#ErrorMsg(s:WARNING,"consider setting g:netrw_compress<".g:netrw_compress."> to something that works",104)
         endif
@@ -6664,7 +6664,7 @@ fun! s:NetrwMarkFileExe(islocal,enbloc)
       for fname in s:netrwmarkfilelist_{curbufnr}
         if a:islocal
           if g:netrw_keepdir
-            let fname= s:ShellEscape(netrw#WinPath(s:ComposePath(curdir,fname)))
+            let fname= s:ShellEscape(netrw#WinPath(netrw#fs#ComposePath(curdir,fname)))
           endif
         else
           let fname= s:ShellEscape(netrw#WinPath(b:netrw_curdir.fname))
@@ -7106,7 +7106,7 @@ fun! s:NetrwMarkFilePrint(islocal)
     for fname in netrwmarkfilelist
       if a:islocal
         if g:netrw_keepdir
-          let fname= s:ComposePath(curdir,fname)
+          let fname= netrw#fs#ComposePath(curdir,fname)
         endif
       else
         let fname= curdir.fname
@@ -7142,7 +7142,7 @@ fun! s:NetrwMarkFileRegexp(islocal)
     " get the matching list of files using local glob()
     "   call Decho("handle local regexp",'~'.expand("<slnum>"))
     let dirname = escape(b:netrw_curdir,g:netrw_glob_escape)
-    let filelist= glob(s:ComposePath(dirname,regexp),0,1,1)
+    let filelist= glob(netrw#fs#ComposePath(dirname,regexp),0,1,1)
     "   call Decho("files<".string(filelist).">",'~'.expand("<slnum>"))
 
     " mark the list of files
@@ -7226,7 +7226,7 @@ fun! s:NetrwMarkFileSource(islocal)
     for fname in netrwmarkfilelist
       if a:islocal
         if g:netrw_keepdir
-          let fname= s:ComposePath(curdir,fname)
+          let fname= netrw#fs#ComposePath(curdir,fname)
         endif
       else
         let fname= curdir.fname
@@ -7316,7 +7316,7 @@ fun! s:NetrwMarkFileTgt(islocal)
     "  * If directory, use it for the target.
     "  * If file, use b:netrw_curdir for the target
     let curword= s:NetrwGetWord()
-    let tgtdir = s:ComposePath(curdir,curword)
+    let tgtdir = netrw#fs#ComposePath(curdir,curword)
     if a:islocal && isdirectory(s:NetrwFile(tgtdir))
       let s:netrwmftgt = tgtdir
     elseif !a:islocal && tgtdir =~ '/$'
@@ -7506,7 +7506,7 @@ fun! s:NetrwUnmarkList(curbufnr,curdir)
   "  remove all files in local marked-file list from global list
   if exists("s:netrwmarkfilelist")
     for mfile in s:netrwmarkfilelist_{a:curbufnr}
-      let dfile = s:ComposePath(a:curdir,mfile)       " prepend directory to mfile
+      let dfile = netrw#fs#ComposePath(a:curdir,mfile)       " prepend directory to mfile
       let idx   = index(s:netrwmarkfilelist,dfile)    " get index in list of dfile
       call remove(s:netrwmarkfilelist,idx)            " remove from global list
     endfor
@@ -10005,7 +10005,7 @@ fun! s:NetrwLocalListingList(dirname,setmaxfilenamelen)
   if g:netrw_cygwin == 0 && has("win32")
   elseif index(filelist,'..') == -1 && dirname !~ '/'
     " include ../ in the glob() entry if its missing
-    let filelist= filelist+[s:ComposePath(dirname,"../")]
+    let filelist= filelist+[netrw#fs#ComposePath(dirname,"../")]
   endif
 
   if a:setmaxfilenamelen && get(g:, 'netrw_dynamic_maxfilenamelen', 0)
@@ -10213,7 +10213,7 @@ fun! s:NetrwLocalRename(path) range
       endif
 
       NetrwKeepj norm! 0
-      let oldname= s:ComposePath(a:path,curword)
+      let oldname= netrw#fs#ComposePath(a:path,curword)
 
       call inputsave()
       let newname= input("Moving ".oldname." to : ",substitute(oldname,'/*$','','e'))
@@ -10306,7 +10306,7 @@ function! s:NetrwLocalRmFile(path, fname, all)
     let ok = ""
     let dir = 0
     NetrwKeepj norm! 0
-    let rmfile = s:NetrwFile(s:ComposePath(a:path, escape(a:fname, '\\')))->fnamemodify(':.')
+    let rmfile = s:NetrwFile(netrw#fs#ComposePath(a:path, escape(a:fname, '\\')))->fnamemodify(':.')
 
     " if not a directory
     if rmfile !~ '^"' && (rmfile =~ '@$' || rmfile !~ '[\/]$')
@@ -10498,65 +10498,6 @@ fun! s:NetrwBadd(islocal,bl2mf)
     call s:NetrwUnmarkList(curbufnr,curdir)                   " remove markings from local buffer
   endif
   "  call Dret("s:NetrwBadd")
-endfun
-
-" ---------------------------------------------------------------------
-"  s:ComposePath: Appends a new part to a path taking different systems into consideration {{{2
-fun! s:ComposePath(base,subdir)
-  "  call Dfunc("s:ComposePath(base<".a:base."> subdir<".a:subdir.">)")
-
-  if has("amiga")
-    "   call Decho("amiga",'~'.expand("<slnum>"))
-    let ec = a:base[s:Strlen(a:base)-1]
-    if ec != '/' && ec != ':'
-      let ret = a:base."/" . a:subdir
-    else
-      let ret = a:base.a:subdir
-    endif
-
-  " COMBAK: test on windows with changing to root directory: :e C:/
-  elseif a:subdir =~ '^\a:[/\\]\([^/\\]\|$\)' && has("win32")
-    "   call Decho("windows",'~'.expand("<slnum>"))
-    let ret= a:subdir
-
-  elseif a:base =~ '^\a:[/\\]\([^/\\]\|$\)' && has("win32")
-    "   call Decho("windows",'~'.expand("<slnum>"))
-    if a:base =~ '[/\\]$'
-      let ret= a:base.a:subdir
-    else
-      let ret= a:base.'/'.a:subdir
-    endif
-
-  elseif a:base =~ '^\a\{3,}://'
-    "   call Decho("remote linux/macos",'~'.expand("<slnum>"))
-    let urlbase = substitute(a:base,'^\(\a\+://.\{-}/\)\(.*\)$','\1','')
-    let curpath = substitute(a:base,'^\(\a\+://.\{-}/\)\(.*\)$','\2','')
-    if a:subdir == '../'
-      if curpath =~ '[^/]/[^/]\+/$'
-        let curpath= substitute(curpath,'[^/]\+/$','','')
-      else
-        let curpath=""
-      endif
-      let ret= urlbase.curpath
-    else
-      let ret= urlbase.curpath.a:subdir
-    endif
-  "   call Decho("urlbase<".urlbase.">",'~'.expand("<slnum>"))
-  "   call Decho("curpath<".curpath.">",'~'.expand("<slnum>"))
-  "   call Decho("ret<".ret.">",'~'.expand("<slnum>"))
-
-  else
-    "   call Decho("local linux/macos",'~'.expand("<slnum>"))
-    let ret = substitute(a:base."/".a:subdir,"//","/","g")
-    if a:base =~ '^//'
-      " keeping initial '//' for the benefit of network share listing support
-      let ret= '/'.ret
-    endif
-    let ret= simplify(ret)
-  endif
-
-  "  call Dret("s:ComposePath ".ret)
-  return ret
 endfun
 
 " ---------------------------------------------------------------------
