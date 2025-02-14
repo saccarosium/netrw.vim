@@ -4085,23 +4085,6 @@ fun! s:NetrwGetBuffer(islocal,dirname)
 endfun
 
 " ---------------------------------------------------------------------
-" s:NetrwGetcwd: get the current directory. {{{2
-"   Change backslashes to forward slashes, if any.
-"   If doesc is true, escape certain troublesome characters
-fun! s:NetrwGetcwd(doesc)
-  "  call Dfunc("NetrwGetcwd(doesc=".a:doesc.")")
-  let curdir= substitute(getcwd(),'\\','/','ge')
-  if curdir !~ '[\/]$'
-    let curdir= curdir.'/'
-  endif
-  if a:doesc
-    let curdir= fnameescape(curdir)
-  endif
-  "  call Dret("NetrwGetcwd <".curdir.">")
-  return curdir
-endfun
-
-" ---------------------------------------------------------------------
 "  s:NetrwGetWord: it gets the directory/file named under the cursor {{{2
 fun! s:NetrwGetWord()
   "  call Dfunc("s:NetrwGetWord() liststyle=".s:ShowStyle()." virtcol=".virtcol("."))
@@ -5644,7 +5627,7 @@ fun! s:NetrwMakeDir(usrhost)
         call mkdir(fullnewdir,"p")
       endif
     else
-      let netrw_origdir= s:NetrwGetcwd(1)
+      let netrw_origdir= netrw#fs#Cwd(1)
       if s:NetrwLcd(b:netrw_curdir)
         return
       endif

@@ -68,5 +68,24 @@ function! netrw#fs#AbsPath(filename)
 endfunction
 
 " }}}
+" netrw#fs#Cwd: get the current directory. {{{
+"   Change backslashes to forward slashes, if any.
+"   If doesc is true, escape certain troublesome characters
+
+function! netrw#fs#Cwd(doesc)
+    let curdir = substitute(getcwd(), '\\', '/', 'ge')
+
+    if curdir !~ '[\/]$'
+        let curdir .= '/'
+    endif
+
+    if a:doesc
+        let curdir = fnameescape(curdir)
+    endif
+
+    return curdir
+endfunction
+
+" }}}
 
 " vim:ts=8 sts=4 sw=4 et fdm=marker
