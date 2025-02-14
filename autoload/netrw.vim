@@ -6179,7 +6179,7 @@ fun! s:NetrwMarkFileCompress(islocal)
       if exists("g:netrw_decompress['".sfx."']")
         " fname has a suffix indicating that its compressed; apply associated decompression routine
         let exe= g:netrw_decompress[sfx]
-        let exe= netrw#WinPath(exe)
+        let exe= netrw#fs#WinPath(exe)
         if a:islocal
           if g:netrw_keepdir
             let fname= netrw#os#Escape(netrw#fs#ComposePath(curdir,fname))
@@ -6200,13 +6200,13 @@ fun! s:NetrwMarkFileCompress(islocal)
         unlet exe
       elseif a:islocal
         " fname not a compressed file, so compress it
-        call system(netrw#WinPath(g:netrw_compress)." ".netrw#os#Escape(netrw#fs#ComposePath(b:netrw_curdir,fname)))
+        call system(netrw#fs#WinPath(g:netrw_compress)." ".netrw#os#Escape(netrw#fs#ComposePath(b:netrw_curdir,fname)))
         if v:shell_error
           call netrw#ErrorMsg(s:WARNING,"consider setting g:netrw_compress<".g:netrw_compress."> to something that works",104)
         endif
       else
         " fname not a compressed file, so compress it
-        NetrwKeepj call s:RemoteSystem(netrw#WinPath(g:netrw_compress)." ".netrw#os#Escape(fname))
+        NetrwKeepj call s:RemoteSystem(netrw#fs#WinPath(g:netrw_compress)." ".netrw#os#Escape(fname))
       endif
     endfor       " for every file in the marked list
 
@@ -6327,9 +6327,9 @@ fun! s:NetrwMarkFileCopy(islocal,...)
     if g:netrw_localcopycmd =~ '\s'
       let copycmd     = substitute(copycmd,'\s.*$','','')
       let copycmdargs = substitute(copycmd,'^.\{-}\(\s.*\)$','\1','')
-      let copycmd     = netrw#WinPath(copycmd).copycmdargs
+      let copycmd     = netrw#fs#WinPath(copycmd).copycmdargs
     else
-      let copycmd = netrw#WinPath(copycmd)
+      let copycmd = netrw#fs#WinPath(copycmd)
     endif
     "   call Decho("args   <".args.">",'~'.expand("<slnum>"))
     "   call Decho("tgt    <".tgt.">",'~'.expand("<slnum>"))
@@ -6579,10 +6579,10 @@ fun! s:NetrwMarkFileExe(islocal,enbloc)
       for fname in s:netrwmarkfilelist_{curbufnr}
         if a:islocal
           if g:netrw_keepdir
-            let fname= netrw#os#Escape(netrw#WinPath(netrw#fs#ComposePath(curdir,fname)))
+            let fname= netrw#os#Escape(netrw#fs#WinPath(netrw#fs#ComposePath(curdir,fname)))
           endif
         else
-          let fname= netrw#os#Escape(netrw#WinPath(b:netrw_curdir.fname))
+          let fname= netrw#os#Escape(netrw#fs#WinPath(b:netrw_curdir.fname))
         endif
         if cmd =~ '%'
           let xcmd= substitute(cmd,'%',fname,'g')
@@ -6904,14 +6904,14 @@ fun! s:NetrwMarkFileMove(islocal)
       if g:netrw_localmovecmd =~ '\s'
         let movecmd     = substitute(g:netrw_localmovecmd,'\s.*$','','')
         let movecmdargs = substitute(g:netrw_localmovecmd,'^.\{-}\(\s.*\)$','\1','')
-        let movecmd     = netrw#WinPath(movecmd).movecmdargs
+        let movecmd     = netrw#fs#WinPath(movecmd).movecmdargs
       "     call Decho("windows exception: movecmd<".movecmd."> (#1: had a space)",'~'.expand("<slnum>"))
       else
-        let movecmd = netrw#WinPath(g:netrw_localmovecmd)
+        let movecmd = netrw#fs#WinPath(g:netrw_localmovecmd)
         "     call Decho("windows exception: movecmd<".movecmd."> (#2: no space)",'~'.expand("<slnum>"))
       endif
     else
-      let movecmd = netrw#WinPath(g:netrw_localmovecmd)
+      let movecmd = netrw#fs#WinPath(g:netrw_localmovecmd)
       "    call Decho("movecmd<".movecmd."> (#3 linux or cygwin)",'~'.expand("<slnum>"))
     endif
     for fname in s:netrwmarkfilelist_{bufnr("%")}
@@ -9576,14 +9576,14 @@ fun! s:NetrwRemoteRmFile(path,rmfile,all)
         NetrwKeepj call s:NetrwRemoteFtpCmd(a:path,"rmdir ".a:rmfile)
       else
         let rmfile          = substitute(a:path.a:rmfile,'/$','','')
-        let netrw_rmdir_cmd = s:MakeSshCmd(netrw#WinPath(g:netrw_rmdir_cmd)).' '.netrw#os#Escape(netrw#WinPath(rmfile))
+        let netrw_rmdir_cmd = s:MakeSshCmd(netrw#fs#WinPath(g:netrw_rmdir_cmd)).' '.netrw#os#Escape(netrw#fs#WinPath(rmfile))
         "      call Decho("attempt to remove dir: system(".netrw_rmdir_cmd.")",'~'.expand("<slnum>"))
         let ret= system(netrw_rmdir_cmd)
         "      call Decho("returned=".ret." errcode=".v:shell_error,'~'.expand("<slnum>"))
 
         if v:shell_error != 0
           "      call Decho("v:shell_error not 0",'~'.expand("<slnum>"))
-          let netrw_rmf_cmd= s:MakeSshCmd(netrw#WinPath(g:netrw_rmf_cmd)).' '.netrw#os#Escape(netrw#WinPath(substitute(rmfile,'[\/]$','','e')))
+          let netrw_rmf_cmd= s:MakeSshCmd(netrw#fs#WinPath(g:netrw_rmf_cmd)).' '.netrw#os#Escape(netrw#fs#WinPath(substitute(rmfile,'[\/]$','','e')))
           "      call Decho("2nd attempt to remove dir: system(".netrw_rmf_cmd.")",'~'.expand("<slnum>"))
           let ret= system(netrw_rmf_cmd)
           "      call Decho("returned=".ret." errcode=".v:shell_error,'~'.expand("<slnum>"))
@@ -9634,7 +9634,7 @@ fun! s:NetrwRemoteRename(usrhost,path) range
       else
         let oldname= netrw#os#Escape(a:path.oldname)
         let newname= netrw#os#Escape(a:path.newname)
-        let ret    = system(netrw#WinPath(rename_cmd).' '.oldname.' '.newname)
+        let ret    = system(netrw#fs#WinPath(rename_cmd).' '.oldname.' '.newname)
       endif
 
     endfor
@@ -9659,7 +9659,7 @@ fun! s:NetrwRemoteRename(usrhost,path) range
       else
         let oldname= netrw#os#Escape(a:path.oldname)
         let newname= netrw#os#Escape(a:path.newname)
-        let ret    = system(netrw#WinPath(rename_cmd).' '.oldname.' '.newname)
+        let ret    = system(netrw#fs#WinPath(rename_cmd).' '.oldname.' '.newname)
       endif
 
       let ctr= ctr + 1
@@ -10279,26 +10279,6 @@ fun! netrw#RFC2396(fname)
 endfun
 
 " ---------------------------------------------------------------------
-" netrw#WinPath: tries to insure that the path is windows-acceptable, whether cygwin is used or not {{{2
-fun! netrw#WinPath(path)
-  "  call Dfunc("netrw#WinPath(path<".a:path.">)")
-  if (!g:netrw_cygwin || &shell !~ '\%(\<bash\>\|\<zsh\>\)\%(\.exe\)\=$') && has("win32")
-    " remove cygdrive prefix, if present
-    let path = substitute(a:path,g:netrw_cygdrive.'/\(.\)','\1:','')
-    " remove trailing slash (Win95)
-    let path = substitute(path, '\(\\\|/\)$', '', 'g')
-    " remove escaped spaces
-    let path = substitute(path, '\ ', ' ', 'g')
-    " convert slashes to backslashes
-    let path = substitute(path, '/', '\', 'g')
-  else
-    let path= a:path
-  endif
-  "  call Dret("netrw#WinPath <".path.">")
-  return path
-endfun
-
-" ---------------------------------------------------------------------
 " s:NetrwBadd: adds marked files to buffer list or vice versa {{{2
 "              cb : bl2mf=0  add marked files to buffer list
 "              cB : bl2mf=1  use bufferlist to mark files
@@ -10622,7 +10602,7 @@ endfun
 "           acceptable.  No effect on Unix paths.
 "  Examples of use:  let result= s:NetrwDelete(path)
 function! s:NetrwDelete(path)
-    let path = netrw#WinPath(a:path)
+    let path = netrw#fs#WinPath(a:path)
 
     if !g:netrw_cygwin && has("win32") && exists("+shellslash")
         let sskeep = &shellslash

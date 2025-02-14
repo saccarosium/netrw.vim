@@ -124,5 +124,25 @@ function! netrw#fs#Glob(direntry, expr, pare)
 endfunction
 
 " }}}
+" netrw#fs#WinPath: tries to insure that the path is windows-acceptable, whether cygwin is used or not {{{
+
+function! netrw#fs#WinPath(path)
+    if (!g:netrw_cygwin || &shell !~ '\%(\<bash\>\|\<zsh\>\)\%(\.exe\)\=$') && has("win32")
+        " remove cygdrive prefix, if present
+        let path = substitute(a:path, g:netrw_cygdrive . '/\(.\)', '\1:', '')
+        " remove trailing slash (Win95)
+        let path = substitute(path, '\(\\\|/\)$', '', 'g')
+        " remove escaped spaces
+        let path = substitute(path, '\ ', ' ', 'g')
+        " convert slashes to backslashes
+        let path = substitute(path, '/', '\', 'g')
+    else
+        let path = a:path
+    endif
+
+    return path
+endfunction
+
+" }}}
 
 " vim:ts=8 sts=4 sw=4 et fdm=marker
