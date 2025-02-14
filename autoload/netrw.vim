@@ -4933,7 +4933,7 @@ fun! netrw#BrowseX(fname,remote)
     endif
   endif
 
-  call netrw#own#Open(fname)
+  call netrw#os#Open(fname)
 
   " cleanup: remove temporary file,
   "          delete current buffer if success with handler,
@@ -5253,7 +5253,7 @@ function! s:NetrwHome()
     " insure that the home directory exists
     if g:netrw_dirhistmax > 0 && !isdirectory(s:NetrwFile(home))
         if exists("g:netrw_mkdir")
-            call system(g:netrw_mkdir." ".netrw#os#Escape(s:NetrwFile(home)))
+            call system(g:netrw_mkdir." ".s:ShellEscape(s:NetrwFile(home)))
         else
             call mkdir(home)
         endif
@@ -11479,7 +11479,7 @@ endfunction
 
 function! netrw#Open(file)
     call netrw#own#Deprecate('netrw#Open', 'v180', {'vim': 'dist#vim9#Open', 'nvim': 'vim.ui.open'})
-    call netrw#own#Open(a:file)
+    call netrw#os#Open(a:file)
 endfunction
 
 function! netrw#WinPath(path)
