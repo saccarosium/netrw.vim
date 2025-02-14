@@ -24,5 +24,14 @@ function! netrw#os#Execute(cmd)
 endfunction
 
 " }}}
+" netrw#os#Escape: shellescape(), or special windows handling {{{
+
+function! netrw#os#Escape(string, ...)
+    return has('win32') && empty($SHELL) && &shellslash
+        \ ? printf('"%s"', substitute(a:string, '"', '""', 'g'))
+        \ : shellescape(a:string, a:0 > 0 ? a:1 : 0)
+endfunction
+
+" }}}
 
 " vim:ts=8 sts=4 sw=4 et fdm=marker
