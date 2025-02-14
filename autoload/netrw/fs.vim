@@ -87,5 +87,42 @@ function! netrw#fs#Cwd(doesc)
 endfunction
 
 " }}}
+" netrw#fs#Glob: does glob() if local, remote listing otherwise {{{
+"     direntry: this is the name of the directory.  Will be fnameescape'd to prevent wildcard handling by glob()
+"     expr    : this is the expression to follow the directory.  Will use netrw#fs#ComposePath()
+"     pare    =1: remove the current directory from the resulting glob() filelist
+"             =0: leave  the current directory   in the resulting glob() filelist
+
+function! netrw#fs#Glob(direntry, expr, pare)
+    if netrw#CheckIfRemote()
+        keepalt 1sp
+        keepalt enew
+        let keep_liststyle = w:netrw_liststyle
+        let w:netrw_liststyle = s:THINLIST
+        if s:NetrwRemoteListing() == 0
+            keepj keepalt %s@/@@
+            let filelist = getline(1,$)
+            q!
+        else
+            " remote listing error -- leave treedict unchanged
+            let filelist = w:netrw_treedict[a:direntry]
+        endif
+        let w:netrw_liststyle = keep_liststyle
+    else
+        let path= netrw#fs#ComposePath(fnameescape(a:direntry), a:expr)
+        if has("win32")
+            " escape [ so it is not detected as wildcard character, see :h wildcard
+            let path = substitute(path, '[', '[[]', 'g')
+        endif
+        let filelist = glob(path, 0, 1, 1)
+        if a:pare
+            let filelist = map(filelist,'substitute(v:val, "^.*/", "", "")')
+        endif
+    endif
+
+    return filelist
+endfunction
+
+" }}}
 
 " vim:ts=8 sts=4 sw=4 et fdm=marker

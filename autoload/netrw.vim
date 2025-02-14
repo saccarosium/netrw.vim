@@ -5117,42 +5117,6 @@ fun! s:NetrwForceChgDir(islocal,newdir)
 endfun
 
 " ---------------------------------------------------------------------
-" s:NetrwGlob: does glob() if local, remote listing otherwise {{{2
-"     direntry: this is the name of the directory.  Will be fnameescape'd to prevent wildcard handling by glob()
-"     expr    : this is the expression to follow the directory.  Will use netrw#fs#ComposePath()
-"     pare    =1: remove the current directory from the resulting glob() filelist
-"             =0: leave  the current directory   in the resulting glob() filelist
-fun! s:NetrwGlob(direntry,expr,pare)
-  "  call Dfunc("s:NetrwGlob(direntry<".a:direntry."> expr<".a:expr."> pare=".a:pare.")")
-  if netrw#CheckIfRemote()
-    keepalt 1sp
-    keepalt enew
-    let keep_liststyle    = w:netrw_liststyle
-    let w:netrw_liststyle = s:THINLIST
-    if s:NetrwRemoteListing() == 0
-      keepj keepalt %s@/@@
-      let filelist= getline(1,$)
-      q!
-    else
-      " remote listing error -- leave treedict unchanged
-      let filelist= w:netrw_treedict[a:direntry]
-    endif
-    let w:netrw_liststyle= keep_liststyle
-  else
-    let path= netrw#fs#ComposePath(fnameescape(a:direntry), a:expr)
-    if has("win32")
-      " escape [ so it is not detected as wildcard character, see :h wildcard
-      let path= substitute(path, '[', '[[]', 'g')
-    endif
-    let filelist = glob(path, 0, 1, 1)
-    if a:pare
-      let filelist= map(filelist,'substitute(v:val, "^.*/", "", "")')
-    endif
-  endif
-  return filelist
-endfun
-
-" ---------------------------------------------------------------------
 " s:NetrwForceFile: (gf support) Force treatment as a file {{{2
 fun! s:NetrwForceFile(islocal,newfile)
   if a:newfile =~ '[/@*=|\\]$'
@@ -8581,8 +8545,8 @@ fun! s:NetrwRefreshTreeDict(dir)
 
     elseif entry =~ '@$' && has_key(w:netrw_treedict,direntry.'@')
       NetrwKeepj call s:NetrwRefreshTreeDict(direntry.'/')
-      let liststar   = s:NetrwGlob(direntry.'/','*',1)
-      let listdotstar= s:NetrwGlob(direntry.'/','.*',1)
+      let liststar   = netrw#fs#Glob(direntry.'/','*',1)
+      let listdotstar= netrw#fs#Glob(direntry.'/','.*',1)
 
     else
     endif
@@ -9967,8 +9931,8 @@ fun! s:NetrwLocalListingList(dirname,setmaxfilenamelen)
   " get the list of files contained in the current directory
   let dirname    = a:dirname
   let dirnamelen = strlen(dirname)
-  let filelist   = s:NetrwGlob(dirname,"*",0)
-  let filelist   = filelist + s:NetrwGlob(dirname,".*",0)
+  let filelist   = netrw#fs#Glob(dirname,"*",0)
+  let filelist   = filelist + netrw#fs#Glob(dirname,".*",0)
 
   if g:netrw_cygwin == 0 && has("win32")
   elseif index(filelist,'..') == -1 && dirname !~ '/'
