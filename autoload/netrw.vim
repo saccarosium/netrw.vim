@@ -11482,6 +11482,11 @@ function! netrw#Open(file)
     call netrw#own#Open(a:file)
 endfunction
 
+function! netrw#WinPath(path)
+    call netrw#own#Deprecate('netrw#WinPath', 'v180', {})
+    call netrw#fs#WinPath(a:path)
+endfunction
+
 " }}}
 " Settings Restoration: {{{1
 " ==========================
