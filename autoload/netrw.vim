@@ -1264,7 +1264,7 @@ fun! netrw#Obtain(islocal,fname,...)
         let path= ""
       endif
       let filelist= join(map(deepcopy(fnamelist),'escape(s:ShellEscape(g:netrw_machine.":".path.v:val,1)," ")'))
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_scp_cmd.s:ShellEscape(useport,1)." ".filelist." ".s:ShellEscape(tgtdir,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_scp_cmd.s:ShellEscape(useport,1)." ".filelist." ".s:ShellEscape(tgtdir,1))
 
     elseif b:netrw_method == 2
       " obtain file using ftp + .netrc
@@ -1291,9 +1291,9 @@ fun! netrw#Obtain(islocal,fname,...)
         "      call Decho("filter input: ".getline('$'),'~'.expand("<slnum>"))
       endfor
       if exists("g:netrw_port") && g:netrw_port != ""
-        call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
+        call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
       else
-        call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
+        call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
       endif
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$" && !exists("g:netrw_quiet") && getline(1) !~ '^Trying '
@@ -1362,7 +1362,7 @@ fun! netrw#Obtain(islocal,fname,...)
       " -n  win32: quit being obnoxious about password
       "  Note: using "_dd to delete to the black hole register; avoids messing up @@
       NetrwKeepj norm! 1G"_dd
-      call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
+      call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
         "     call Decho("error<".getline(1).">",'~'.expand("<slnum>"))
@@ -1379,7 +1379,7 @@ fun! netrw#Obtain(islocal,fname,...)
       else
         let localfile= a:fname
       endif
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_sftp_cmd." ".s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1).s:ShellEscape(localfile)." ".s:ShellEscape(tgtdir))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_sftp_cmd." ".s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1).s:ShellEscape(localfile)." ".s:ShellEscape(tgtdir))
 
     elseif !exists("b:netrw_method") || b:netrw_method < 0
       " probably a badly formed url; protocol not recognized
@@ -1951,7 +1951,7 @@ fun! netrw#NetRead(mode,...)
           let uid_machine = g:netrw_machine
         endif
       endif
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_rcp_cmd." ".s:netrw_rcpmode." ".s:ShellEscape(uid_machine.":".b:netrw_fname,1)." ".s:ShellEscape(tmpfile,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_rcp_cmd." ".s:netrw_rcpmode." ".s:ShellEscape(uid_machine.":".b:netrw_fname,1)." ".s:ShellEscape(tmpfile,1))
       let result           = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
       let b:netrw_lastfile = choice
 
@@ -1972,9 +1972,9 @@ fun! netrw#NetRead(mode,...)
       call setline(line("$")+1,'get "'.netrw_fname.'" '.tmpfile)
       "     call Decho("filter input: ".getline(line("$")),'~'.expand("<slnum>"))
       if exists("g:netrw_port") && g:netrw_port != ""
-        call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
+        call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
       else
-        call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
+        call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
       endif
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$" && !exists("g:netrw_quiet") && getline(1) !~ '^Trying '
@@ -2040,7 +2040,7 @@ fun! netrw#NetRead(mode,...)
       " -n  unix : DON'T use <.netrc>, even though it exists
       " -n  win32: quit being obnoxious about password
       NetrwKeepj norm! 1G"_dd
-      call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
+      call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
         "     call Decho("error<".getline(1).">",'~'.expand("<slnum>"))
@@ -2068,7 +2068,7 @@ fun! netrw#NetRead(mode,...)
       else
         let tmpfile_get = tmpfile
       endif
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_scp_cmd.useport." ".escape(s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1),' ')." ".s:ShellEscape(tmpfile_get,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_scp_cmd.useport." ".escape(s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1),' ')." ".s:ShellEscape(tmpfile_get,1))
       let result           = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
       let b:netrw_lastfile = choice
 
@@ -2088,9 +2088,9 @@ fun! netrw#NetRead(mode,...)
         " using g:netrw_http_cmd (usually elinks, links, curl, wget, or fetch)
         "     call Decho('using '.g:netrw_http_cmd.' (# not in b:netrw_fname<'.b:netrw_fname.">)",'~'.expand("<slnum>"))
         if exists("g:netrw_http_xcmd")
-          call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_http_cmd." ".s:ShellEscape(b:netrw_http."://".g:netrw_machine.b:netrw_fname,1)." ".g:netrw_http_xcmd." ".s:ShellEscape(tmpfile,1))
+          call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_http_cmd." ".s:ShellEscape(b:netrw_http."://".g:netrw_machine.b:netrw_fname,1)." ".g:netrw_http_xcmd." ".s:ShellEscape(tmpfile,1))
         else
-          call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_http_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(b:netrw_http."://".g:netrw_machine.b:netrw_fname,1))
+          call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_http_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(b:netrw_http."://".g:netrw_machine.b:netrw_fname,1))
         endif
         let result = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
 
@@ -2101,7 +2101,7 @@ fun! netrw#NetRead(mode,...)
         let netrw_tag = substitute(b:netrw_fname,"^.*#","","")
         "     call Decho("netrw_html<".netrw_html.">",'~'.expand("<slnum>"))
         "     call Decho("netrw_tag <".netrw_tag.">",'~'.expand("<slnum>"))
-        call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_http_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(b:netrw_http."://".g:netrw_machine.netrw_html,1))
+        call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_http_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(b:netrw_http."://".g:netrw_machine.netrw_html,1))
         let result = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
         "     call Decho('<\s*a\s*name=\s*"'.netrw_tag.'"/','~'.expand("<slnum>"))
         exe 'NetrwKeepj norm! 1G/<\s*a\s*name=\s*"'.netrw_tag.'"/'."\<CR>"
@@ -2121,7 +2121,7 @@ fun! netrw#NetRead(mode,...)
         return
       endif
       if g:netrw_dav_cmd =~ "curl"
-        call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_dav_cmd." ".s:ShellEscape("dav://".g:netrw_machine.b:netrw_fname,1)." ".s:ShellEscape(tmpfile,1))
+        call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_dav_cmd." ".s:ShellEscape("dav://".g:netrw_machine.b:netrw_fname,1)." ".s:ShellEscape(tmpfile,1))
       else
         " Construct execution string (four lines) which will be passed through filter
         let netrw_fname= escape(b:netrw_fname,g:netrw_fname_escape)
@@ -2140,7 +2140,7 @@ fun! netrw#NetRead(mode,...)
 
         " perform cadaver operation:
         NetrwKeepj norm! 1G"_dd
-        call s:NetrwExe(s:netrw_silentxfer."%!".g:netrw_dav_cmd)
+        call netrw#os#Execute(s:netrw_silentxfer."%!".g:netrw_dav_cmd)
         keepj bd!
       endif
       let result           = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
@@ -2150,7 +2150,7 @@ fun! netrw#NetRead(mode,...)
     " NetRead: (rsync) NetRead Method #7 {{{3
     elseif     b:netrw_method  == 7
       "    call Decho("read via rsync (method #7)",'~'.expand("<slnum>"))
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_rsync_cmd." ".s:ShellEscape(g:netrw_machine.g:netrw_rsync_sep.b:netrw_fname,1)." ".s:ShellEscape(tmpfile,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_rsync_cmd." ".s:ShellEscape(g:netrw_machine.g:netrw_rsync_sep.b:netrw_fname,1)." ".s:ShellEscape(tmpfile,1))
       let result           = s:NetrwGetFile(readcmd,tmpfile, b:netrw_method)
       let b:netrw_lastfile = choice
 
@@ -2174,9 +2174,9 @@ fun! netrw#NetRead(mode,...)
       "    call Decho("read via fetch for ".netrw_option,'~'.expand("<slnum>"))
 
       if exists("g:netrw_uid") && g:netrw_uid != "" && exists("s:netrw_passwd") && s:netrw_passwd != ""
-        call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_fetch_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(netrw_option."://".g:netrw_uid.':'.s:netrw_passwd.'@'.g:netrw_machine."/".b:netrw_fname,1))
+        call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_fetch_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(netrw_option."://".g:netrw_uid.':'.s:netrw_passwd.'@'.g:netrw_machine."/".b:netrw_fname,1))
       else
-        call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_fetch_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(netrw_option."://".g:netrw_machine."/".b:netrw_fname,1))
+        call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_fetch_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(netrw_option."://".g:netrw_machine."/".b:netrw_fname,1))
       endif
 
       let result          = s:NetrwGetFile(readcmd,tmpfile, b:netrw_method)
@@ -2188,7 +2188,7 @@ fun! netrw#NetRead(mode,...)
     " NetRead: (sftp) NetRead Method #9 {{{3
     elseif     b:netrw_method  == 9
       "    call Decho("read via sftp (method #9)",'~'.expand("<slnum>"))
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_sftp_cmd." ".s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1)." ".tmpfile)
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_sftp_cmd." ".s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1)." ".tmpfile)
       let result          = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
       let b:netrw_lastfile = choice
 
@@ -2196,7 +2196,7 @@ fun! netrw#NetRead(mode,...)
     " NetRead: (file) NetRead Method #10 {{{3
     elseif      b:netrw_method == 10 && exists("g:netrw_file_cmd")
       "   "    call Decho("read via ".b:netrw_file_cmd." (method #10)",'~'.expand("<slnum>"))
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_file_cmd." ".s:ShellEscape(b:netrw_fname,1)." ".tmpfile)
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_file_cmd." ".s:ShellEscape(b:netrw_fname,1)." ".tmpfile)
       let result           = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
       let b:netrw_lastfile = choice
 
@@ -2359,7 +2359,7 @@ fun! netrw#NetWrite(...) range
           let uid_machine = g:netrw_machine
         endif
       endif
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_rcp_cmd." ".s:netrw_rcpmode." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(uid_machine.":".b:netrw_fname,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_rcp_cmd." ".s:netrw_rcpmode." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(uid_machine.":".b:netrw_fname,1))
       let b:netrw_lastfile = choice
 
       ".........................................
@@ -2385,10 +2385,10 @@ fun! netrw#NetWrite(...) range
       NetrwKeepj call setline(line("$")+1,'put "'.tmpfile.'" "'.netrw_fname.'"')
       "    call Decho("filter input: ".getline("$"),'~'.expand("<slnum>"))
       if exists("g:netrw_port") && g:netrw_port != ""
-        call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
+        call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
       else
         "     call Decho("filter input window#".winnr(),'~'.expand("<slnum>"))
-        call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
+        call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
       endif
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
@@ -2456,7 +2456,7 @@ fun! netrw#NetWrite(...) range
       " -n  unix : DON'T use <.netrc>, even though it exists
       " -n  win32: quit being obnoxious about password
       NetrwKeepj norm! 1G"_dd
-      call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
+      call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
         if  !exists("g:netrw_quiet")
@@ -2480,7 +2480,7 @@ fun! netrw#NetWrite(...) range
       else
         let useport= ""
       endif
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_scp_cmd.useport." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_scp_cmd.useport." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(g:netrw_machine.":".b:netrw_fname,1))
       let b:netrw_lastfile = choice
 
       ".........................................
@@ -2490,7 +2490,7 @@ fun! netrw#NetWrite(...) range
       let curl= substitute(g:netrw_http_put_cmd,'\s\+.*$',"","")
       if executable(curl)
         let url= g:netrw_choice
-        call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_http_put_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(url,1) )
+        call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_http_put_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(url,1) )
       elseif !exists("g:netrw_quiet")
         call netrw#ErrorMsg(s:ERROR,"can't write to http using <".g:netrw_http_put_cmd.">",16)
       endif
@@ -2522,7 +2522,7 @@ fun! netrw#NetWrite(...) range
 
       " perform cadaver operation:
       NetrwKeepj norm! 1G"_dd
-      call s:NetrwExe(s:netrw_silentxfer."%!".g:netrw_dav_cmd)
+      call netrw#os#Execute(s:netrw_silentxfer."%!".g:netrw_dav_cmd)
 
       " remove enew buffer (quietly)
       let filtbuf= bufnr("%")
@@ -2536,7 +2536,7 @@ fun! netrw#NetWrite(...) range
     " NetWrite: (rsync) NetWrite Method #7 {{{3
     elseif     b:netrw_method == 7
       "    call Decho("write via rsync (method #7)",'~'.expand("<slnum>"))
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_rsync_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(g:netrw_machine.g:netrw_rsync_sep.b:netrw_fname,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_rsync_cmd." ".s:ShellEscape(tmpfile,1)." ".s:ShellEscape(g:netrw_machine.g:netrw_rsync_sep.b:netrw_fname,1))
       let b:netrw_lastfile = choice
 
       ".........................................
@@ -2560,7 +2560,7 @@ fun! netrw#NetWrite(...) range
       call setline(1,'put "'.escape(tmpfile,'\').'" '.netrw_fname)
       "    call Decho("filter input: ".getline('.'),'~'.expand("<slnum>"))
       let sftpcmd= substitute(g:netrw_sftp_cmd,"%TEMPFILE%",escape(tmpfile,'\'),"g")
-      call s:NetrwExe(s:netrw_silentxfer."%!".sftpcmd.' '.s:ShellEscape(uid_machine,1))
+      call netrw#os#Execute(s:netrw_silentxfer."%!".sftpcmd.' '.s:ShellEscape(uid_machine,1))
       let filtbuf= bufnr("%")
       exe curbuf."b!"
       let &l:bh            = bhkeep
@@ -5595,7 +5595,7 @@ fun! s:NetrwMakeDir(usrhost)
       if s:NetrwLcd(b:netrw_curdir)
         return
       endif
-      call s:NetrwExe("sil! !".g:netrw_localmkdir.g:netrw_localmkdiropt.' '.s:ShellEscape(newdirname,1))
+      call netrw#os#Execute("sil! !".g:netrw_localmkdir.g:netrw_localmkdiropt.' '.s:ShellEscape(newdirname,1))
       if v:shell_error != 0
         let @@= ykeep
         call netrw#ErrorMsg(s:ERROR,"consider setting g:netrw_localmkdir<".g:netrw_localmkdir."> to something that works",80)
@@ -5621,7 +5621,7 @@ fun! s:NetrwMakeDir(usrhost)
     " Remote mkdir:  using ssh
     let mkdircmd  = s:MakeSshCmd(g:netrw_mkdir_cmd)
     let newdirname= substitute(b:netrw_curdir,'^\%(.\{-}/\)\{3}\(.*\)$','\1','').newdirname
-    call s:NetrwExe("sil! !".mkdircmd." ".s:ShellEscape(newdirname,1))
+    call netrw#os#Execute("sil! !".mkdircmd." ".s:ShellEscape(newdirname,1))
     if v:shell_error == 0
       " refresh listing
       let svpos= winsaveview()
@@ -6384,7 +6384,7 @@ fun! s:NetrwMarkFileCopy(islocal,...)
     if exists("*mkdir")
       call mkdir(tmpdir)
     else
-      call s:NetrwExe("sil! !".g:netrw_localmkdir.g:netrw_localmkdiropt.' '.s:ShellEscape(tmpdir,1))
+      call netrw#os#Execute("sil! !".g:netrw_localmkdir.g:netrw_localmkdiropt.' '.s:ShellEscape(tmpdir,1))
       if v:shell_error != 0
         call netrw#ErrorMsg(s:WARNING,"consider setting g:netrw_localmkdir<".g:netrw_localmkdir."> to something that works",80)
         "     call Dret("s:NetrwMarkFileCopy : failed: sil! !".g:netrw_localmkdir.' '.s:ShellEscape(tmpdir,1) )
@@ -7817,7 +7817,7 @@ fun! s:NetrwUpload(fname,tgt,...)
       endif
       let machine = substitute(a:tgt,'^scp://\([^/:]\+\).*$','\1','')
       let tgt     = substitute(a:tgt,'^scp://[^/]\+/\(.*\)$','\1','')
-      call s:NetrwExe(s:netrw_silentxfer."!".g:netrw_scp_cmd.s:ShellEscape(useport,1)." ".args." ".s:ShellEscape(machine.":".tgt,1))
+      call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_scp_cmd.s:ShellEscape(useport,1)." ".args." ".s:ShellEscape(machine.":".tgt,1))
       if s:NetrwLcd(curdir)
         "     call Dret("s:NetrwUpload : lcd failure")
         return
@@ -7855,10 +7855,10 @@ fun! s:NetrwUpload(fname,tgt,...)
         endfor
 
         if exists("g:netrw_port") && g:netrw_port != ""
-          call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
+          call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1)." ".s:ShellEscape(g:netrw_port,1))
         else
           "      call Decho("filter input window#".winnr(),'~'.expand("<slnum>"))
-          call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
+          call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".s:ShellEscape(g:netrw_machine,1))
         endif
         " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
         sil NetrwKeepj g/Local directory now/d
@@ -7921,7 +7921,7 @@ fun! s:NetrwUpload(fname,tgt,...)
         " -n  unix : DON'T use <.netrc>, even though it exists
         " -n  win32: quit being obnoxious about password
         NetrwKeepj norm! 1G"_dd
-        call s:NetrwExe(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
+        call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
         " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
         sil NetrwKeepj g/Local directory now/d
         call histdel("/",-1)
@@ -9200,7 +9200,7 @@ fun! s:NetrwRemoteFtpCmd(path,listcmd)
     " -n  win32: quit being obnoxious about password
     if exists("w:netrw_bannercnt")
       "    exe w:netrw_bannercnt.',$g/^./call Decho("ftp#".line(".").": ".getline("."),''~''.expand("<slnum>"))'
-      call s:NetrwExe(s:netrw_silentxfer.w:netrw_bannercnt.",$!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
+      call netrw#os#Execute(s:netrw_silentxfer.w:netrw_bannercnt.",$!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
       "   else " Decho
       "    call Decho("WARNING: w:netrw_bannercnt doesn't exist!",'~'.expand("<slnum>"))
       "    g/^./call Decho("SKIPPING ftp#".line(".").": ".getline("."),'~'.expand("<slnum>"))
@@ -10847,26 +10847,6 @@ fun! s:NetrwEnew(...)
   endif
 
   "  call Dret("s:NetrwEnew : buf#".bufnr("%")."<".bufname("%")."> expand(%)<".expand("%")."> expand(#)<".expand("#")."> bh=".&bh." win#".winnr()." winnr($)#".winnr("$"))
-endfun
-
-" ---------------------------------------------------------------------
-" s:NetrwExe: executes a string using "!" {{{2
-fun! s:NetrwExe(cmd)
-  if has("win32") && exepath(&shell) !~? '\v[\/]?(cmd|pwsh|powershell)(\.exe)?$' && !g:netrw_cygwin
-    let savedShell=[&shell,&shellcmdflag,&shellxquote,&shellxescape,&shellquote,&shellpipe,&shellredir,&shellslash]
-    set shell& shellcmdflag& shellxquote& shellxescape&
-    set shellquote& shellpipe& shellredir& shellslash&
-    try
-      exe a:cmd
-    finally
-      let [&shell,&shellcmdflag,&shellxquote,&shellxescape,&shellquote,&shellpipe,&shellredir,&shellslash] = savedShell
-    endtry
-  else
-    exe a:cmd
-  endif
-  if v:shell_error
-    call netrw#ErrorMsg(s:WARNING,"shell signalled an error",106)
-  endif
 endfun
 
 " ---------------------------------------------------------------------

@@ -1,0 +1,28 @@
+" FUNCTIONS IN THIS FILES ARE MENT TO BE USE BY NETRW.VIM AND NETRW.VIM ONLY.
+" THIS FUNCTIONS DON'T COMMIT TO ANY BACKWARDS COMPATABILITY. SO CHANGES AND
+" BREAKAGES IF USED OUTSIDE OF NETRW.VIM ARE EXPECTED.
+
+" netrw#os#Execute: executes a string using "!" {{{
+
+function! netrw#os#Execute(cmd)
+    if has("win32") && exepath(&shell) !~? '\v[\/]?(cmd|pwsh|powershell)(\.exe)?$' && !g:netrw_cygwin
+        let savedShell=[&shell,&shellcmdflag,&shellxquote,&shellxescape,&shellquote,&shellpipe,&shellredir,&shellslash]
+        set shell& shellcmdflag& shellxquote& shellxescape&
+        set shellquote& shellpipe& shellredir& shellslash&
+        try
+            execute a:cmd
+        finally
+            let [&shell,&shellcmdflag,&shellxquote,&shellxescape,&shellquote,&shellpipe,&shellredir,&shellslash] = savedShell
+        endtry
+    else
+        execute a:cmd
+    endif
+
+    if v:shell_error
+        call netrw#ErrorMsg(s:WARNING, "shell signalled an error", 106)
+    endif
+endfunction
+
+" }}}
+
+" vim:ts=8 sts=4 sw=4 et fdm=marker
