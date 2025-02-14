@@ -3897,21 +3897,6 @@ fun! s:NetrwFileInfo(islocal,fname)
 endfun
 
 " ---------------------------------------------------------------------
-" s:NetrwFullPath: returns the full path to a directory and/or file {{{2
-fun! s:NetrwFullPath(filename)
-  "  " call Dfunc("s:NetrwFullPath(filename<".a:filename.">)")
-  let filename= a:filename
-  if filename !~ '^/'
-    let filename= resolve(getcwd().'/'.filename)
-  endif
-  if filename != "/" && filename =~ '/$'
-    let filename= substitute(filename,'/$','','')
-  endif
-  "  " call Dret("s:NetrwFullPath <".filename.">")
-  return filename
-endfun
-
-" ---------------------------------------------------------------------
 " s:NetrwGetBuffer: [get a new|find an old netrw] buffer for a netrw listing {{{2
 "   returns 0=cleared buffer
 "           1=re-used buffer (buffer not cleared)
@@ -3935,11 +3920,11 @@ fun! s:NetrwGetBuffer(islocal,dirname)
   if exists("w:netrw_liststyle") && w:netrw_liststyle == s:TREELIST
     let bufnum = -1
 
-    if !empty(s:netrwbuf) && has_key(s:netrwbuf,s:NetrwFullPath(dirname))
+    if !empty(s:netrwbuf) && has_key(s:netrwbuf,netrw#fs#AbsPath(dirname))
       if has_key(s:netrwbuf,"NetrwTreeListing")
         let bufnum= s:netrwbuf["NetrwTreeListing"]
       else
-        let bufnum= s:netrwbuf[s:NetrwFullPath(dirname)]
+        let bufnum= s:netrwbuf[netrw#fs#AbsPath(dirname)]
       endif
       "    call Decho("  NetrwTreeListing: bufnum#".bufnum,'~'.expand("<slnum>"))
       if !bufexists(bufnum)
@@ -3954,16 +3939,16 @@ fun! s:NetrwGetBuffer(islocal,dirname)
       let bufnum= -1
     endif
 
-  elseif has_key(s:netrwbuf,s:NetrwFullPath(dirname))
-    let bufnum= s:netrwbuf[s:NetrwFullPath(dirname)]
-    "   call Decho("  lookup netrwbuf dictionary: s:netrwbuf[".s:NetrwFullPath(dirname)."]=".bufnum,'~'.expand("<slnum>"))
+  elseif has_key(s:netrwbuf,netrw#fs#AbsPath(dirname))
+    let bufnum= s:netrwbuf[netrw#fs#AbsPath(dirname)]
+    "   call Decho("  lookup netrwbuf dictionary: s:netrwbuf[".netrw#fs#AbsPath(dirname)."]=".bufnum,'~'.expand("<slnum>"))
     if !bufexists(bufnum)
-      call remove(s:netrwbuf,s:NetrwFullPath(dirname))
+      call remove(s:netrwbuf,netrw#fs#AbsPath(dirname))
       let bufnum= -1
     endif
 
   else
-    "   call Decho("  lookup netrwbuf dictionary: s:netrwbuf[".s:NetrwFullPath(dirname)."] not a key",'~'.expand("<slnum>"))
+    "   call Decho("  lookup netrwbuf dictionary: s:netrwbuf[".netrw#fs#AbsPath(dirname)."] not a key",'~'.expand("<slnum>"))
     let bufnum= -1
   endif
   "  call Decho("  bufnum#".bufnum,'~'.expand("<slnum>"))
@@ -4013,8 +3998,8 @@ fun! s:NetrwGetBuffer(islocal,dirname)
     else
       call s:NetrwBufRename(dirname)
       " enter the new buffer into the s:netrwbuf dictionary
-      let s:netrwbuf[s:NetrwFullPath(dirname)]= bufnr("%")
-      "    call Decho("update netrwbuf dictionary: s:netrwbuf[".s:NetrwFullPath(dirname)."]=".bufnr("%"),'~'.expand("<slnum>"))
+      let s:netrwbuf[netrw#fs#AbsPath(dirname)]= bufnr("%")
+      "    call Decho("update netrwbuf dictionary: s:netrwbuf[".netrw#fs#AbsPath(dirname)."]=".bufnr("%"),'~'.expand("<slnum>"))
       "    call Decho("netrwbuf dictionary=".string(s:netrwbuf),'~'.expand("<slnum>"))
     endif
   "   call Decho("  named enew buffer#".bufnr("%")."<".bufname("%").">",'~'.expand("<slnum>"))
