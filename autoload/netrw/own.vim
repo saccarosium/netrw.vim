@@ -29,14 +29,6 @@ function! netrw#own#Deprecate(name, version, alternatives)
     call add(s:deprecation_msgs, a:name)
 endfunction
 
-function! netrw#own#Open(file) abort
-    if has('nvim')
-        call luaeval('vim.ui.open(_A[1]) and nil', [a:file])
-    else
-        call dist#vim9#Open(a:file)
-    endif
-endfunction
-
 " }}}
 " Path Utilities: {{{
 
