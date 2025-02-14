@@ -3,6 +3,7 @@
 " BREAKAGES IF USED OUTSIDE OF NETRW.VIM ARE EXPECTED.
 
 " netrw#fs#ComposePath: Appends a new part to a path taking different systems into consideration {{{
+
 function! netrw#fs#ComposePath(base, subdir)
     if has('amiga')
         let ec = a:base[s:Strlen(a:base)-1]
@@ -47,6 +48,23 @@ function! netrw#fs#ComposePath(base, subdir)
     endif
 
     return ret
+endfunction
+
+" }}}
+" netrw#fs#AbsPath: returns the full path to a directory and/or file {{{
+
+function! netrw#fs#AbsPath(filename)
+    let filename = a:filename
+
+    if filename !~ '^/'
+        let filename = resolve(getcwd() . '/' . filename)
+    endif
+
+    if filename != "/" && filename =~ '/$'
+        let filename = substitute(filename, '/$', '', '')
+    endif
+
+    return filename
 endfunction
 
 " }}}
