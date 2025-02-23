@@ -2,6 +2,25 @@
 " THESE FUNCTIONS DON'T COMMIT TO ANY BACKWARDS COMPATIBILITY. SO CHANGES AND
 " BREAKAGES IF USED OUTSIDE OF NETRW.VIM ARE EXPECTED.
 
+let s:slash = &shellslash ? '/' : '\'
+
+" netrw#fs#PathJoin: Appends a new part to a path taking different systems into consideration {{{
+
+function! netrw#fs#PathJoin(...)
+    let path = ""
+
+    for arg in a:000
+        if empty(path)
+            let path = arg
+        else
+            let path .= s:slash . arg
+        endif
+    endfor
+
+    return path
+endfunction
+
+" }}}
 " netrw#fs#ComposePath: Appends a new part to a path taking different systems into consideration {{{
 
 function! netrw#fs#ComposePath(base, subdir)

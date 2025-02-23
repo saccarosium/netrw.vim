@@ -5230,7 +5230,7 @@ endfun
 "  s:NetrwHome: this function determines a "home" for saving bookmarks and history {{{2
 function! s:NetrwHome()
     if has('nvim')
-        let home = netrw#own#PathJoin(stdpath('state'), 'netrw')
+        let home = netrw#fs#PathJoin(stdpath('state'), 'netrw')
     elseif exists('g:netrw_home')
         let home = expand(g:netrw_home)
     elseif exists('$MYVIMDIR')

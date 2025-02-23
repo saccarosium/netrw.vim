@@ -30,24 +30,5 @@ function! netrw#own#Deprecate(name, version, alternatives)
 endfunction
 
 " }}}
-" Path Utilities: {{{
-
-let s:slash = &shellslash ? '/' : '\'
-
-function! netrw#own#PathJoin(...)
-    let path = ""
-
-    for arg in a:000
-        if empty(path)
-            let path = arg
-        else
-            let path .= s:slash . arg
-        endif
-    endfor
-
-    return path
-endfunction
-
-" }}}
 
 " vim:ts=8 sts=4 sw=4 et fdm=marker
