@@ -2,8 +2,6 @@
 " THESE FUNCTIONS DON'T COMMIT TO ANY BACKWARDS COMPATIBILITY. SO CHANGES AND
 " BREAKAGES IF USED OUTSIDE OF NETRW.VIM ARE EXPECTED.
 
-" General: {{{
-
 let s:deprecation_msgs = []
 function! netrw#own#Deprecate(name, version, alternatives)
     " If running on neovim use vim.deprecate
@@ -28,7 +26,5 @@ function! netrw#own#Deprecate(name, version, alternatives)
 
     call add(s:deprecation_msgs, a:name)
 endfunction
-
-" }}}
 
 " vim:ts=8 sts=4 sw=4 et fdm=marker
