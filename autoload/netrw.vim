@@ -10384,26 +10384,6 @@ fun! netrw#UserMaps(islocal)
 endfun
 
 " ---------------------------------------------------------------------
-" netrw#WinPath: tries to insure that the path is windows-acceptable, whether cygwin is used or not {{{2
-fun! netrw#WinPath(path)
-  "  call Dfunc("netrw#WinPath(path<".a:path.">)")
-  if (!g:netrw_cygwin || &shell !~ '\%(\<bash\>\|\<zsh\>\)\%(\.exe\)\=$') && has("win32")
-    " remove cygdrive prefix, if present
-    let path = substitute(a:path,g:netrw_cygdrive.'/\(.\)','\1:','')
-    " remove trailing slash (Win95)
-    let path = substitute(path, '\(\\\|/\)$', '', 'g')
-    " remove escaped spaces
-    let path = substitute(path, '\ ', ' ', 'g')
-    " convert slashes to backslashes
-    let path = substitute(path, '/', '\', 'g')
-  else
-    let path= a:path
-  endif
-  "  call Dret("netrw#WinPath <".path.">")
-  return path
-endfun
-
-" ---------------------------------------------------------------------
 " s:NetrwBadd: adds marked files to buffer list or vice versa {{{2
 "              cb : bl2mf=0  add marked files to buffer list
 "              cB : bl2mf=1  use bufferlist to mark files
