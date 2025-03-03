@@ -10293,6 +10293,18 @@ fun! netrw#Call(funcname,...)
 endfun
 
 " ---------------------------------------------------------------------
+" netrw#LogLevel: returns the specified loglevel
+fun! netrw#LogLevel(level)
+  if a:level == 'WARNING'
+    return s:WARNING
+  elseif a:level == 'NOTE'
+    return s:NOTE
+  elseif a:level == 'ERROR'
+    return s:ERROR
+  endif
+endfun
+
+" ---------------------------------------------------------------------
 " netrw#Expose: allows UserMaps and pchk to look at otherwise script-local variables {{{2
 "               I expect this function to be used in
 "                 :PChkAssert netrw#Expose("netrwmarkfilelist")
