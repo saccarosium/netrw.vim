@@ -10671,27 +10671,6 @@ fun! s:RestoreRegister(dict)
 endfun
 
 " ---------------------------------------------------------------------
-" s:NetrwBufRemover: removes a buffer that: {{{2s
-"                    has buffer-id > 1
-"                    is unlisted
-"                    is unnamed
-"                    does not appear in any window
-fun! s:NetrwBufRemover(bufid)
-  "  call Dfunc("s:NetrwBufRemover(".a:bufid.")")
-  "  call Decho("buf#".a:bufid."           ".((a:bufid > 1)? ">" : "≯")." must be >1 for removal","~".expand("<slnum>"))
-  "  call Decho("buf#".a:bufid." is        ".(buflisted(a:bufid)? "listed" : "unlisted"),"~".expand("<slnum>"))
-  "  call Decho("buf#".a:bufid." has name <".bufname(a:bufid).">","~".expand("<slnum>"))
-  "  call Decho("buf#".a:bufid." has winid#".bufwinid(a:bufid),"~".expand("<slnum>"))
-
-  if a:bufid > 1 && !buflisted(a:bufid) && bufloaded(a:bufid) && bufname(a:bufid) == "" && bufwinid(a:bufid) == -1
-    "   call Decho("(s:NetrwBufRemover) removing buffer#".a:bufid,"~".expand("<slnum>"))
-    exe "sil! bd! ".a:bufid
-  endif
-
-  "  call Dret("s:NetrwBufRemover")
-endfun
-
-" ---------------------------------------------------------------------
 " s:NetrwEnew: opens a new buffer, passes netrw buffer variables through {{{2
 fun! s:NetrwEnew(...)
   "  call Dfunc("s:NetrwEnew() a:0=".a:0." win#".winnr()." winnr($)=".winnr("$")." bufnr($)=".bufnr("$")." expand(%)<".expand("%").">")
@@ -10700,7 +10679,10 @@ fun! s:NetrwEnew(...)
   " Clean out the last buffer:
   " Check if the last buffer has # > 1, is unlisted, is unnamed, and does not appear in a window
   " If so, delete it.
-  call s:NetrwBufRemover(bufnr("$"))
+  let bufid = bufnr('$')
+  if bufid > 1 && !buflisted(bufid) && bufloaded(bufid) && bufname(bufid) == "" && bufwinid(bufid) == -1
+    execute printf("silent! bdelete! %s", bufid)
+  endif
 
   " grab a function-local-variable copy of buffer variables
   "  call Decho("make function-local copy of netrw variables",'~'.expand("<slnum>"))
