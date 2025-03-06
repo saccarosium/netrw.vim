@@ -2153,7 +2153,7 @@ fun! netrw#NetRead(mode,...)
   endif
   if s:FileReadable(tmpfile) && tmpfile !~ '.tar.bz2$' && tmpfile !~ '.tar.gz$' && tmpfile !~ '.zip' && tmpfile !~ '.tar' && readcmd != 't' && tmpfile !~ '.tar.xz$' && tmpfile !~ '.txz'
     "   call Decho("cleanup by deleting tmpfile<".tmpfile.">",'~'.expand("<slnum>"))
-    NetrwKeepj call s:NetrwDelete(tmpfile)
+    call netrw#fs#Remove(tmpfile)
   endif
   NetrwKeepj call s:NetrwOptionsRestore("w:")
 
@@ -2521,7 +2521,7 @@ fun! netrw#NetWrite(...) range
   "  call Decho("cleanup",'~'.expand("<slnum>"))
   if s:FileReadable(tmpfile)
     "   call Decho("tmpfile<".tmpfile."> readable, will now delete it",'~'.expand("<slnum>"))
-    call s:NetrwDelete(tmpfile)
+    call netrw#fs#Remove(tmpfile)
   endif
   call s:NetrwOptionsRestore("w:")
 
@@ -6354,7 +6354,7 @@ fun! s:NetrwMarkFileCopy(islocal,...)
       NetrwKeepj call s:NetrwUpload(localfiles,s:netrwmftgt)
       if getcwd() == tmpdir
         for fname in s:netrwmarkfilelist_{bufnr('%')}
-          NetrwKeepj call s:NetrwDelete(fname)
+          call netrw#fs#Remove(fname)
         endfor
         if s:NetrwLcd(curdir)
           "      call Dret("s:NetrwMarkFileCopy : lcd failure")
@@ -10221,7 +10221,7 @@ function! s:NetrwLocalRmFile(path, fname, all)
 
     if !dir && (all || empty(ok))
         " This works because delete return 0 if successful
-        if s:NetrwDelete(rmfile)
+        if netrw#fs#Remove(rmfile)
             call netrw#ErrorMsg(s:ERROR, printf("unable to delete <%s>!", rmfile), 103)
         else
             " Remove file only if there are no pending changes
@@ -10669,30 +10669,6 @@ fun! s:RestoreRegister(dict)
     call setreg(key, val[0], val[1])
   endfor
 endfun
-
-" ---------------------------------------------------------------------
-" s:NetrwDelete: Deletes a file. {{{2
-"           Uses Steve Hall's idea to insure that Windows paths stay
-"           acceptable.  No effect on Unix paths.
-"  Examples of use:  let result= s:NetrwDelete(path)
-function! s:NetrwDelete(path)
-    let path = netrw#fs#WinPath(a:path)
-
-    if !g:netrw_cygwin && has("win32") && exists("+shellslash")
-        let sskeep = &shellslash
-        setl noshellslash
-        let result = delete(path)
-        let &shellslash = sskeep
-    else
-        let result = delete(path)
-    endif
-
-    if result < 0
-        NetrwKeepj call netrw#ErrorMsg(s:WARNING, "delete(".path.") failed!", 71)
-    endif
-
-    return result
-endfunction
 
 " ---------------------------------------------------------------------
 " s:NetrwBufRemover: removes a buffer that: {{{2s
