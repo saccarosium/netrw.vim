@@ -19,7 +19,7 @@ if &cp || exists("g:loaded_netrw")
     finish
 endif
 
-let g:loaded_netrw = "v178"
+let g:loaded_netrw = "v179"
 
 if !has("patch-9.1.1054") && !has('nvim')
     echoerr 'netrw needs Vim v9.1.1054'
@@ -3106,7 +3106,7 @@ endfun
 fun! s:NetrwValidateHostname(hostname)
     " RFC1123#section-2 mandates, a valid hostname starts with letters or digits
     " so reject everyhing else
-    return a:hostname =~? '^[a-z0-9]' 
+    return a:hostname =~? '^[a-z0-9]'
 endfun
 
 " ---------------------------------------------------------------------
