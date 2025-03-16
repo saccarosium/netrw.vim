@@ -124,10 +124,10 @@ let s:has_balloon = !has('nvim') &&
 
 " ---------------------------------------------------------------------
 " Default option values: {{{2
-let g:netrw_localcopycmdopt    = ""
-let g:netrw_localcopydircmdopt = ""
-let g:netrw_localmkdiropt      = ""
-let g:netrw_localmovecmdopt    = ""
+call s:NetrwInit("g:netrw_localcopycmdopt","")
+call s:NetrwInit("g:netrw_localcopydircmdopt","")
+call s:NetrwInit("g:netrw_localmkdiropt","")
+call s:NetrwInit("g:netrw_localmovecmdopt","")
 
 " ---------------------------------------------------------------------
 " Default values for netrw's global protocol variables {{{2
@@ -334,7 +334,7 @@ if !exists("g:netrw_localcopycmd")
       let g:netrw_localcopycmd= "cp"
     else
       let g:netrw_localcopycmd   = expand("$COMSPEC", v:true)
-      let g:netrw_localcopycmdopt= " /c copy"
+      call s:NetrwInit("g:netrw_localcopycmdopt"," /c copy")
     endif
   elseif has("unix") || has("macunix")
     let g:netrw_localcopycmd= "cp"
@@ -346,17 +346,17 @@ if !exists("g:netrw_localcopydircmd")
   if has("win32")
     if g:netrw_cygwin
       let g:netrw_localcopydircmd   = "cp"
-      let g:netrw_localcopydircmdopt= " -R"
+      call s:NetrwInit("g:netrw_localcopydircmdopt"," -R")
     else
       let g:netrw_localcopydircmd   = expand("$COMSPEC", v:true)
-      let g:netrw_localcopydircmdopt= " /c xcopy /e /c /h /i /k"
+      call s:NetrwInit("g:netrw_localcopydircmdopt"," /c xcopy /e /c /h /i /k")
     endif
   elseif has("unix")
     let g:netrw_localcopydircmd   = "cp"
-    let g:netrw_localcopydircmdopt= " -R"
+    call s:NetrwInit("g:netrw_localcopydircmdopt"," -R")
   elseif has("macunix")
     let g:netrw_localcopydircmd   = "cp"
-    let g:netrw_localcopydircmdopt= " -R"
+    call s:NetrwInit("g:netrw_localcopydircmdopt"," -R")
   else
     let g:netrw_localcopydircmd= ""
   endif
@@ -369,8 +369,8 @@ if has("win32")
   if g:netrw_cygwin
     call s:NetrwInit("g:netrw_localmkdir","mkdir")
   else
-    let g:netrw_localmkdir   = expand("$COMSPEC", v:true)
-    let g:netrw_localmkdiropt= " /c mkdir"
+    call s:NetrwInit("g:netrw_localmkdir",expand("$COMSPEC", v:true))
+    call s:NetrwInit("g:netrw_localmkdiropt"," /c mkdir")
   endif
 else
   call s:NetrwInit("g:netrw_localmkdir","mkdir")
@@ -388,7 +388,7 @@ if !exists("g:netrw_localmovecmd")
       let g:netrw_localmovecmd= "mv"
     else
       let g:netrw_localmovecmd   = expand("$COMSPEC", v:true)
-      let g:netrw_localmovecmdopt= " /c move"
+      call s:NetrwInit("g:netrw_localmovecmdopt"," /c move")
     endif
   elseif has("unix") || has("macunix")
     let g:netrw_localmovecmd= "mv"
