@@ -19,7 +19,7 @@ if &cp || exists("g:loaded_netrw")
     finish
 endif
 
-let g:loaded_netrw = "v179"
+let g:loaded_netrw = "v180"
 
 if !has("patch-9.1.1054") && !has('nvim')
     echoerr 'netrw needs Vim v9.1.1054'
@@ -11378,23 +11378,6 @@ fun! s:UserMaps(islocal,funcname)
 endfun
 
 " Deprecated: {{{1
-
-function! netrw#Launch(args)
-    call netrw#msg#Deprecate('netrw#Launch', 'v180', {'vim': 'dist#vim9#Launch', 'nvim': 'vim.system'})
-    if !has('nvim')
-        call dist#vim9#Launch(args)
-    endif
-endfunction
-
-function! netrw#Open(file)
-    call netrw#msg#Deprecate('netrw#Open', 'v180', {'vim': 'dist#vim9#Open', 'nvim': 'vim.ui.open'})
-    call netrw#os#Open(a:file)
-endfunction
-
-function! netrw#WinPath(path)
-    call netrw#msg#Deprecate('netrw#WinPath', 'v180', {})
-    call netrw#fs#WinPath(a:path)
-endfunction
 
 " }}}
 " Settings Restoration: {{{1
