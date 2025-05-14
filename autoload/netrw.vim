@@ -114,7 +114,6 @@ endif
 let s:NOTE    = 0
 let s:WARNING = 1
 let s:ERROR   = 2
-call s:NetrwInit("g:netrw_errorlvl", s:NOTE)
 
 let s:has_balloon = !has('nvim') &&
             \ has("balloon_eval") &&
