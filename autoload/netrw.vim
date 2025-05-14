@@ -46,39 +46,10 @@ setl cpo&vim
 "          (this function can optionally take a list of messages)
 "  Mar 03, 2025 : max errnum currently is 107
 function! netrw#ErrorMsg(level, msg, errnum)
-    if a:level < g:netrw_errorlvl
-        return
-    endif
-
-    if a:level == 1
-        let level = "**warning** (netrw) "
-    elseif a:level == 2
-        let level = "**error** (netrw) "
-    else
-        let level = "**note** (netrw) "
-    endif
-
     if has('nvim')
-        call v:lua.vim.notify(level . a:msg, a:level + 2)
+        call v:lua.vim.notify(a:msg, a:level + 2)
     else
-        " (optional) netrw will show messages using echomsg.  Even if the
-        " message doesn't appear, at least it'll be recallable via :messages
-        "   redraw!
-        if a:level == s:WARNING
-            echohl WarningMsg
-        elseif a:level == s:ERROR
-            echohl ErrorMsg
-        endif
-
-        if type(a:msg) == 3
-            for msg in a:msg
-                echomsg level.msg
-            endfor
-        else
-            echomsg level.a:msg
-        endif
-
-        echohl None
+        call netrw#msg#Notify(a:level, a:msg)
     endif
 endfunction
 
@@ -114,6 +85,7 @@ endif
 let s:NOTE    = 0
 let s:WARNING = 1
 let s:ERROR   = 2
+let g:_netrw_log = {'NOTE': 0, 'WARN': 1, 'ERROR': 2}
 
 let s:has_balloon = !has('nvim') &&
             \ has("balloon_eval") &&
