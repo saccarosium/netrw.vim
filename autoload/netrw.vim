@@ -810,9 +810,7 @@ fun! netrw#Explore(indx,dosplit,style,...)
       keepalt NetrwKeepj call s:SetupNetrwStatusLine('%f %h%m%r%=%9*%{NetrwStatusLine()}')
 
     else
-      if !exists("g:netrw_quiet")
-        call netrw#msg#Notify('WARNING', 'your vim needs the +path_extra feature for Exploring with **!')
-      endif
+      call netrw#msg#Notify('WARNING', 'your vim needs the +path_extra feature for Exploring with **!')
       if has("clipboard") && g:netrw_clipboard
         if @* != keepregstar | sil! let @* = keepregstar | endif
         if @+ != keepregplus | sil! let @+ = keepregplus | endif
@@ -1104,7 +1102,7 @@ fun! netrw#Obtain(islocal,fname,...)
         call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".netrw#os#Escape(g:netrw_machine,1))
       endif
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
-      if getline(1) !~ "^$" && !exists("g:netrw_quiet") && getline(1) !~ '^Trying '
+      if getline(1) !~ "^$" && getline(1) !~ '^Trying '
         let debugkeep= &debug
         setl debug=msg
         call netrw#msg#Notify('ERROR', getline(1))
@@ -1162,9 +1160,7 @@ fun! netrw#Obtain(islocal,fname,...)
       call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
-        if !exists("g:netrw_quiet")
           call netrw#msg#Notify('ERROR', getline(1))
-        endif
       endif
 
     elseif b:netrw_method == 9
@@ -1182,9 +1178,7 @@ fun! netrw#Obtain(islocal,fname,...)
 
     else
       " protocol recognized but not supported for Obtain (yet?)
-      if !exists("g:netrw_quiet")
         call netrw#msg#Notify('ERROR', 'current protocol not supported for obtaining file')
-      endif
       return
     endif
 
@@ -1628,9 +1622,7 @@ fun! netrw#NetRead(mode,...)
             let wholechoice = wholechoice . " " . choice
             let ichoice     = ichoice + 1
             if ichoice > a:0
-              if !exists("g:netrw_quiet")
-                call netrw#msg#Notify('ERROR', printf('Unbalanced string in filename "%s"', wholechoice))
-              endif
+              call netrw#msg#Notify('ERROR', printf('Unbalanced string in filename "%s"', wholechoice))
               return
             endif
             let choice= a:{ichoice}
@@ -1709,7 +1701,7 @@ fun! netrw#NetRead(mode,...)
         call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." -i ".netrw#os#Escape(g:netrw_machine,1))
       endif
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
-      if getline(1) !~ "^$" && !exists("g:netrw_quiet") && getline(1) !~ '^Trying '
+      if getline(1) !~ "^$" && getline(1) !~ '^Trying '
         let debugkeep = &debug
         setl debug=msg
         call netrw#msg#Notify('ERROR', getline(1))
@@ -1766,9 +1758,7 @@ fun! netrw#NetRead(mode,...)
       call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
-        if !exists("g:netrw_quiet")
           call netrw#msg#Notify('ERROR', getline(1))
-        endif
       endif
       call s:SaveBufVars()|keepj bd!|call s:RestoreBufVars()
       let result           = s:NetrwGetFile(readcmd, tmpfile, b:netrw_method)
@@ -1797,9 +1787,7 @@ fun! netrw#NetRead(mode,...)
     " NetRead: (http) NetRead Method #5 (wget) {{{3
     elseif     b:netrw_method  == 5
       if g:netrw_http_cmd == ""
-        if !exists("g:netrw_quiet")
           call netrw#msg#Notify('ERROR', 'neither the wget nor the fetch command is available')
-        endif
         return
       endif
 
@@ -1869,9 +1857,7 @@ fun! netrw#NetRead(mode,...)
     "    fetch://[user@]host[:http]/path
     elseif     b:netrw_method  == 8
       if g:netrw_fetch_cmd == ""
-        if !exists("g:netrw_quiet")
           call netrw#msg#Notify('ERROR', "fetch command not available")
-        endif
         return
       endif
       if exists("g:netrw_option") && g:netrw_option =~ ":https\="
@@ -2005,9 +1991,7 @@ fun! netrw#NetWrite(...) range
             let wholechoice= wholechoice . " " . choice
             let ichoice    = ichoice + 1
             if choice > a:0
-              if !exists("g:netrw_quiet")
                 call netrw#msg#Notify('ERROR', printf('Unbalanced string in filename "%s"', wholechoice))
-              endif
               return
             endif
             let choice= a:{ichoice}
@@ -2078,9 +2062,7 @@ fun! netrw#NetWrite(...) range
       endif
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
-        if !exists("g:netrw_quiet")
-          call netrw#msg#Notify('ERROR', getline(1))
-        endif
+        call netrw#msg#Notify('ERROR', getline(1))
         let mod=1
       endif
 
@@ -2136,9 +2118,7 @@ fun! netrw#NetWrite(...) range
       call netrw#os#Execute(s:netrw_silentxfer."%!".s:netrw_ftp_cmd." ".g:netrw_ftp_options)
       " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
       if getline(1) !~ "^$"
-        if  !exists("g:netrw_quiet")
-          call netrw#msg#Notify('ERROR', getline(1))
-        endif
+        call netrw#msg#Notify('ERROR', getline(1))
         let mod=1
       endif
 
@@ -2166,7 +2146,7 @@ fun! netrw#NetWrite(...) range
       if executable(curl)
         let url= g:netrw_choice
         call netrw#os#Execute(s:netrw_silentxfer."!".g:netrw_http_put_cmd." ".netrw#os#Escape(tmpfile,1)." ".netrw#os#Escape(url,1) )
-      elseif !exists("g:netrw_quiet")
+      else
         call netrw#msg#Notify('ERROR', printf("can't write to http using <%s>", g:netrw_http_put_cmd))
       endif
 
@@ -2658,9 +2638,7 @@ fun! s:NetrwMethod(choice)
 
   " Cannot Determine Method {{{3
   else
-    if !exists("g:netrw_quiet")
-      call netrw#msg#Notify('WARNING', 'cannot determine method (format: protocol://[user@]hostname[:port]/[path])')
-    endif
+    call netrw#msg#Notify('WARNING', 'cannot determine method (format: protocol://[user@]hostname[:port]/[path])')
     let b:netrw_method  = -1
   endif
   "}}}3
@@ -3260,9 +3238,7 @@ fun! s:NetrwBrowse(islocal,dirname)
 
     let dirpat  = '^\(\w\{-}\)://\(\w\+@\)\=\([^/]\+\)/\(.*\)$'
     if dirname !~ dirpat
-      if !exists("g:netrw_quiet")
-        call netrw#msg#Notify('ERROR', printf("netrw doesn't understand your dirname<%s>", dirname))
-      endif
+      call netrw#msg#Notify('ERROR', printf("netrw doesn't understand your dirname<%s>", dirname))
       NetrwKeepj call s:NetrwOptionsRestore("w:")
       setl noma nomod nowrap
       return
@@ -4900,16 +4876,12 @@ fun! s:NetrwMakeDir(usrhost)
     " sanity checks
     let fullnewdir= b:netrw_curdir.'/'.newdirname
     if isdirectory(s:NetrwFile(fullnewdir))
-      if !exists("g:netrw_quiet")
-        call netrw#msg#Notify('WARNING', printf('<%s> is already a directory!', newdirname))
-      endif
+      call netrw#msg#Notify('WARNING', printf('<%s> is already a directory!', newdirname))
       let @@= ykeep
       return
     endif
     if s:FileReadable(fullnewdir)
-      if !exists("g:netrw_quiet")
-        call netrw#msg#Notify('WARNING', printf('<%s> is already a file!', newdirname))
-      endif
+      call netrw#msg#Notify('WARNING', printf('<%s> is already a file!', newdirname))
       let @@= ykeep
       return
     endif
@@ -4945,7 +4917,7 @@ fun! s:NetrwMakeDir(usrhost)
       let svpos= winsaveview()
       call s:NetrwRefresh(1,s:NetrwBrowseChgDir(1,'./',0))
       call winrestview(svpos)
-    elseif !exists("g:netrw_quiet")
+    else
       call netrw#msg#Notify('ERROR', printf('unable to make directory<%s>', newdirname))
     endif
 
@@ -4959,7 +4931,7 @@ fun! s:NetrwMakeDir(usrhost)
       let svpos= winsaveview()
       NetrwKeepj call s:NetrwRefresh(0,s:NetrwBrowseChgDir(0,'./',0))
       NetrwKeepj call winrestview(svpos)
-    elseif !exists("g:netrw_quiet")
+    else
       call netrw#msg#Notify('ERROR', printf('unable to make directory<%s>', newdirname))
     endif
 
@@ -6483,21 +6455,12 @@ fun! s:NetrwOpenFile(islocal)
   " Does the filename contain a path?
   if fname !~ '[/\\]'
     if exists("b:netrw_curdir")
-      if exists("g:netrw_quiet")
-        let netrw_quiet_keep = g:netrw_quiet
-      endif
-      let g:netrw_quiet = 1
       " save position for benefit of Rexplore
       let s:rexposn_{bufnr("%")}= winsaveview()
       if b:netrw_curdir =~ '/$'
         exe "NetrwKeepj e ".fnameescape(b:netrw_curdir.fname)
       else
         exe "e ".fnameescape(b:netrw_curdir."/".fname)
-      endif
-      if exists("netrw_quiet_keep")
-        let g:netrw_quiet= netrw_quiet_keep
-      else
-        unlet g:netrw_quiet
       endif
     endif
   else
@@ -6964,7 +6927,7 @@ fun! s:NetrwUpload(fname,tgt,...)
         " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
         sil NetrwKeepj g/Local directory now/d
         call histdel("/",-1)
-        if getline(1) !~ "^$" && !exists("g:netrw_quiet") && getline(1) !~ '^Trying '
+        if getline(1) !~ "^$" && getline(1) !~ '^Trying '
           call netrw#msg#Notify('ERROR', getline(1))
         else
           bw!|q
@@ -7017,7 +6980,7 @@ fun! s:NetrwUpload(fname,tgt,...)
         " If the result of the ftp operation isn't blank, show an error message (tnx to Doug Claar)
         sil NetrwKeepj g/Local directory now/d
         call histdel("/",-1)
-        if getline(1) !~ "^$" && !exists("g:netrw_quiet") && getline(1) !~ '^Trying '
+        if getline(1) !~ "^$" && getline(1) !~ '^Trying '
           let debugkeep= &debug
           setl debug=msg
           call netrw#msg#Notify('ERROR', getline(1))
@@ -7073,10 +7036,10 @@ fun! s:NetrwPreview(path) range
       if exists("pvhkeep")
         let &pvh= pvhkeep
       endif
-    elseif !exists("g:netrw_quiet")
+    else
       call netrw#msg#Notify('WARNING', printf('sorry, cannot preview a directory such as <%s>', a:path))
     endif
-  elseif !exists("g:netrw_quiet")
+  else
     call netrw#msg#Notify('WARNING', 'sorry, to preview your vim needs the quickfix feature compiled in')
   endif
   NetrwKeepj call s:NetrwOptionsRestore("s:")
@@ -8177,20 +8140,16 @@ fun! s:NetrwRemoteListing()
   " sanity check:
   if exists("b:netrw_method") && b:netrw_method =~ '[235]'
     if !executable("ftp")
-      if !exists("g:netrw_quiet")
-        call netrw#msg#Notify('ERROR', "this system doesn't support remote directory listing via ftp")
-      endif
+      call netrw#msg#Notify('ERROR', "this system doesn't support remote directory listing via ftp")
       call s:NetrwOptionsRestore("w:")
       return -1
     endif
 
   elseif !exists("g:netrw_list_cmd") || g:netrw_list_cmd == ''
-    if !exists("g:netrw_quiet")
-      if g:netrw_list_cmd == ""
-        call netrw#msg#Notify('ERROR', printf('your g:netrw_list_cmd is empty; perhaps %s is not executable on your system', g:netrw_ssh_cmd))
-      else
-        call netrw#msg#Notify('ERROR', "this system doesn't support remote directory listing via ".g:netrw_list_cmd)
-      endif
+    if g:netrw_list_cmd == ""
+      call netrw#msg#Notify('ERROR', printf('your g:netrw_list_cmd is empty; perhaps %s is not executable on your system', g:netrw_ssh_cmd))
+    else
+      call netrw#msg#Notify('ERROR', "this system doesn't support remote directory listing via ".g:netrw_list_cmd)
     endif
 
     NetrwKeepj call s:NetrwOptionsRestore("w:")
@@ -8459,7 +8418,7 @@ fun! s:NetrwRemoteRmFile(path,rmfile,all)
           let netrw_rmf_cmd= s:MakeSshCmd(netrw#fs#WinPath(g:netrw_rmf_cmd)).' '.netrw#os#Escape(netrw#fs#WinPath(substitute(rmfile,'[\/]$','','e')))
           let ret= system(netrw_rmf_cmd)
 
-          if v:shell_error != 0 && !exists("g:netrw_quiet")
+          if v:shell_error != 0
             call netrw#msg#Notify('ERROR', printf('unable to remove directory<%s> -- is it empty?', rmfile))
           endif
         endif
