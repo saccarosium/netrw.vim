@@ -6617,8 +6617,7 @@ function s:NetrwMenu(domenu)
         elseif !a:domenu
             let s:netrwcnt = 0
             let curwin     = winnr()
-            keepjumps windo if getline(2) =~# "Netrw"
-            let s:netrwcnt = s:netrwcnt + 1
+            windo if getline(2) =~# "Netrw" | let s:netrwcnt= s:netrwcnt + 1 | endif
         endif
         exe curwin."wincmd w"
 
