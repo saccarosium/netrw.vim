@@ -8629,8 +8629,7 @@ function s:NetrwLocalListingList(dirname,setmaxfilenamelen)
     " get the list of files contained in the current directory
     let dirname    = a:dirname
     let dirnamelen = strlen(dirname)
-    let filelist   = netrw#fs#Glob(dirname,"*",0)
-    let filelist   = filelist + netrw#fs#Glob(dirname,".*",0)
+    let filelist   = map(['.', '..'] + readdir(dirname), 'netrw#fs#PathJoin(dirname, v:val)')
 
     if g:netrw_cygwin == 0 && has("win32")
     elseif index(filelist,'..') == -1 && dirname !~ '/'
@@ -8646,19 +8645,20 @@ function s:NetrwLocalListingList(dirname,setmaxfilenamelen)
     let resultfilelist = []
     for filename in filelist
 
-        if getftype(filename) == "link"
+        let ftype = getftype(filename)
+        if ftype ==# "link"
             " indicate a symbolic link
             let pfile= filename."@"
 
-        elseif getftype(filename) == "socket"
+        elseif ftype ==# "socket"
             " indicate a socket
             let pfile= filename."="
 
-        elseif getftype(filename) == "fifo"
+        elseif ftype ==# "fifo"
             " indicate a fifo
             let pfile= filename."|"
 
-        elseif isdirectory(s:NetrwFile(filename))
+        elseif ftype ==# "dir"
             " indicate a directory
             let pfile= filename."/"
 
