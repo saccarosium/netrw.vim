@@ -15,7 +15,7 @@ if &cp || exists("g:loaded_netrwSettings")
     finish
 endif
 
-let g:loaded_netrwSettings = "v180"
+let g:loaded_netrwSettings = "v181"
 
 " NetrwSettings: {{{
 
