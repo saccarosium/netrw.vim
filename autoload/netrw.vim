@@ -9049,20 +9049,6 @@ function! netrw#Call(funcname,...)
     return call("s:".a:funcname,a:000)
 endfunction
 
-<<<<<<< HEAD
-=======
-" netrw#LogLevel: returns the specified loglevel
-function! netrw#LogLevel(level)
-    if a:level == 'WARNING'
-        return s:WARNING
-    elseif a:level == 'NOTE'
-        return s:NOTE
-    elseif a:level == 'ERROR'
-        return s:ERROR
-    endif
-endfunction
-
->>>>>>> b83083b (chore: indent autoload/netrw.vim correctly)
 " netrw#Expose: allows UserMaps and pchk to look at otherwise script-local variables {{{2
 "               I expect this function to be used in
 "                 :PChkAssert netrw#Expose("netrwmarkfilelist")
