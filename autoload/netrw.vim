@@ -32,19 +32,11 @@ setl cpo&vim
 "  Netrw Variables: {{{1
 
 " s:NetrwInit: initializes variables if they haven't been defined {{{2
-"            Loosely,  varname = value.
-function s:NetrwInit(varname,value)
-  if !exists(a:varname)
-    if type(a:value) == 0
-      exe "let ".a:varname."=".a:value
-    elseif type(a:value) == 1 && a:value =~ '^[{[]'
-      exe "let ".a:varname."=".a:value
-    elseif type(a:value) == 1
-      exe "let ".a:varname."="."'".a:value."'"
-    else
-      exe "let ".a:varname."=".a:value
+
+function s:NetrwInit(name, default)
+    if !exists(a:name)
+        let {a:name} = a:default
     endif
-  endif
 endfunction
 
 "  Netrw Constants: {{{2
@@ -172,35 +164,35 @@ call s:NetrwInit("g:netrw_dirhistcnt"      , 0)
 let s:xz_opt = has('unix') ? "XZ_OPT=-T0" :
       \ (has("win32") && &shell =~? '\vcmd(\.exe)?$' ?
       \ "setx XZ_OPT=-T0 &&" : "")
-call s:NetrwInit("g:netrw_decompress ", "{"
-      \ .."'.lz4':      'lz4 -d',"
-      \ .."'.lzo':      'lzop -d',"
-      \ .."'.lz':       'lzip -dk',"
-      \ .."'.7z':       '7za x',"
-      \ .."'.001':      '7za x',"
-      \ .."'.zip':      'unzip',"
-      \ .."'.bz':       'bunzip2 -k',"
-      \ .."'.bz2':      'bunzip2 -k',"
-      \ .."'.gz':       'gunzip -k',"
-      \ .."'.lzma':     'unlzma -T0 -k',"
-      \ .."'.xz':       'unxz -T0 -k',"
-      \ .."'.zst':      'zstd -T0 -d',"
-      \ .."'.Z':        'uncompress -k',"
-      \ .."'.tar':      'tar -xvf',"
-      \ .."'.tar.bz':   'tar -xvjf',"
-      \ .."'.tar.bz2':  'tar -xvjf',"
-      \ .."'.tbz':      'tar -xvjf',"
-      \ .."'.tbz2':     'tar -xvjf',"
-      \ .."'.tar.gz':   'tar -xvzf',"
-      \ .."'.tgz':      'tar -xvzf',"
-      \ .."'.tar.lzma': '"..s:xz_opt.." tar -xvf --lzma',"
-      \ .."'.tlz':      '"..s:xz_opt.." tar -xvf --lzma',"
-      \ .."'.tar.xz':   '"..s:xz_opt.." tar -xvfJ',"
-      \ .."'.txz':      '"..s:xz_opt.." tar -xvfJ',"
-      \ .."'.tar.zst':  '"..s:xz_opt.." tar -xvf --use-compress-program=unzstd',"
-      \ .."'.tzst':     '"..s:xz_opt.." tar -xvf --use-compress-program=unzstd',"
-      \ .."'.rar':      '"..(executable("unrar")?"unrar x -ad":"rar x -ad").."'"
-      \ .."}")
+call s:NetrwInit("g:netrw_decompress", {
+            \ '.lz4': 'lz4 -d',
+            \ '.lzo': 'lzop -d',
+            \ '.lz': 'lzip -dk',
+            \ '.7z': '7za x',
+            \ '.001': '7za x',
+            \ '.zip': 'unzip',
+            \ '.bz': 'bunzip2 -k',
+            \ '.bz2': 'bunzip2 -k',
+            \ '.gz': 'gunzip -k',
+            \ '.lzma': 'unlzma -T0 -k',
+            \ '.xz': 'unxz -T0 -k',
+            \ '.zst': 'zstd -T0 -d',
+            \ '.Z': 'uncompress -k',
+            \ '.tar': 'tar -xvf',
+            \ '.tar.bz': 'tar -xvjf',
+            \ '.tar.bz2': 'tar -xvjf',
+            \ '.tbz': 'tar -xvjf',
+            \ '.tbz2': 'tar -xvjf',
+            \ '.tar.gz': 'tar -xvzf',
+            \ '.tgz': 'tar -xvzf',
+            \ '.tar.lzma': s:xz_opt .. ' tar -xvf --lzma',
+            \ '.tlz': s:xz_opt .. ' tar -xvf --lzma',
+            \ '.tar.xz': s:xz_opt .. ' tar -xvfJ',
+            \ '.txz': s:xz_opt .. ' tar -xvfJ',
+            \ '.tar.zst': s:xz_opt .. ' tar -xvf --use-compress-program=unzstd',
+            \ '.tzst': s:xz_opt .. ' tar -xvf --use-compress-program=unzstd',
+            \ '.rar': (executable("unrar")?"unrar x -ad":"rar x -ad"),
+            \ })
 unlet s:xz_opt
 call s:NetrwInit("g:netrw_dirhistmax"       , 10)
 call s:NetrwInit("g:netrw_fastbrowse"       , 1)
@@ -389,7 +381,7 @@ if has("gui_running") && (&enc == 'utf-8' || &enc == 'utf-16' || &enc == 'ucs-4'
 else
   let s:treedepthstring= "| "
 endif
-call s:NetrwInit("s:netrw_posn",'{}')
+call s:NetrwInit("s:netrw_posn", {})
 
 " BufEnter event ignored by decho when following variable is true
 "  Has a side effect that doau BufReadPost doesn't work, so
