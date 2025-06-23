@@ -11,3 +11,11 @@ If you are using vim make sure to:
 ```vim
 packadd editorconfig
 ```
+
+## Reproducing an issue
+
+Use the `minimalrc.vim` provided in the `contrib` directory
+
+To test the issue with the minimalrc use:
+- on nvim: `nvim --clean -u contrib/minimalrc.vim`
+- on vim: `vim -u contrib/minimalrc.vim`
