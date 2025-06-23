@@ -3751,7 +3751,7 @@ endfunction
 "    cursor=0: newdir is relative to b:netrw_curdir
 "          =1: newdir is relative to the path to the word under the cursor in
 "              tree view
-function s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
+function s:NetrwBrowseChgDir(islocal, newdir, cursor, ...)
     let ykeep= @@
     if !exists("b:netrw_curdir")
         let @@= ykeep
@@ -3764,29 +3764,22 @@ function s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
     NetrwKeepj call s:NetrwOptionsSafe(a:islocal)
 
     let newdir = a:newdir
-    if a:cursor && exists("w:netrw_liststyle") && w:netrw_liststyle == s:TREELIST && exists("w:netrw_treetop")
+    let dirname = b:netrw_curdir
+
+    if a:cursor && w:netrw_liststyle == s:TREELIST
         " dirname is the path to the word under the cursor
         let dirname = s:NetrwTreePath(w:netrw_treetop)
-        " newdir resolves to a directory and points to a directory in dirname
-        " /tmp/test/folder_symlink/ -> /tmp/test/original_folder/
-        if a:islocal && fnamemodify(dirname, ':t') == newdir && isdirectory(resolve(dirname)) && resolve(dirname) == resolve(newdir)
-            let dirname = fnamemodify(resolve(dirname), ':p:h:h')
-            let newdir = fnamemodify(resolve(newdir), ':t')
-        endif
-        " Remove trailing "/"
-        let dirname = substitute(dirname, "/$", "", "")
-
         " If the word under the cursor is a directory (except for ../), NetrwTreePath
         " returns the full path, including the word under the cursor, remove it
-        if newdir =~ "/$" && newdir != "../"
+        if newdir != "../"
             let dirname = fnamemodify(dirname, ":h")
         endif
-    else
-        let dirname = b:netrw_curdir
     endif
+
     if has("win32")
-        let dirname = substitute(dirname,'\\','/','ge')
+        let dirname = substitute(dirname, '\\', '/', 'ge')
     endif
+
     let dolockout = 0
     let dorestore = 1
 
@@ -3804,19 +3797,9 @@ function s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
     endif
 
     " set up o/s-dependent directory recognition pattern
-    if has("amiga")
-        let dirpat= '[\/:]$'
-    else
-        let dirpat= '[\/]$'
-    endif
+    let dirpat = has("amiga") ? '[\/:]$' : '[\/]$'
 
-    if dirname !~ dirpat
-        " apparently vim is "recognizing" that it is in a directory and
-        " is removing the trailing "/".  Bad idea, so let's put it back.
-        let dirname= dirname.'/'
-    endif
-
-    if newdir !~ dirpat && !(a:islocal && isdirectory(s:NetrwFile(netrw#fs#ComposePath(dirname,newdir))))
+    if newdir !~ dirpat && !(a:islocal && isdirectory(s:NetrwFile(netrw#fs#ComposePath(dirname, newdir))))
         " ------------------------------
         " NetrwBrowseChgDir: edit a file {{{3
         " ------------------------------
@@ -3824,17 +3807,10 @@ function s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
         " save position for benefit of Rexplore
         let s:rexposn_{bufnr("%")}= winsaveview()
 
-        if exists("w:netrw_liststyle") && w:netrw_liststyle == s:TREELIST && exists("w:netrw_treedict") && newdir !~ '^\(/\|\a:\)'
-            if dirname =~ '/$'
-                let dirname= dirname.newdir
-            else
-                let dirname= dirname."/".newdir
-            endif
-        elseif newdir =~ '^\(/\|\a:\)'
-            let dirname= newdir
-        else
-            let dirname= netrw#fs#ComposePath(dirname,newdir)
-        endif
+        let dirname = isabsolutepath(newdir)
+                    \ ? netrw#fs#AbsPath(newdir)
+                    \ : netrw#fs#ComposePath(dirname, newdir)
+
         " this lets netrw#BrowseX avoid the edit
         if a:0 < 1
             NetrwKeepj call s:NetrwOptionsRestore("s:")
@@ -3907,6 +3883,7 @@ function s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
                 " if e the new file would fail due to &mod, then don't change any of the flags
                 let dolockout= 1
             endif
+
             if a:islocal
                 " some like c-^ to return to the last edited file
                 " others like c-^ to return to the netrw buffer
@@ -3918,7 +3895,6 @@ function s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
                     " file came from vim's hidden storage.  Don't "restore" options with it.
                     let dorestore= 0
                 endif
-            else
             endif
 
             " handle g:Netrw_funcref -- call external-to-netrw functions
@@ -3958,6 +3934,8 @@ function s:NetrwBrowseChgDir(islocal,newdir,cursor,...)
         " --------------------------------------
         " NetrwBrowseChgDir: go up one directory {{{3
         " --------------------------------------
+
+        let dirname = netrw#fs#Dirname(dirname)
 
         if w:netrw_liststyle == s:TREELIST && exists("w:netrw_treedict")
             " force a refresh
@@ -7698,7 +7676,9 @@ function s:PerformListing(islocal)
 
     " get list of files
     if a:islocal
-        NetrwKeepj call s:LocalListing()
+        let filelist = s:NetrwLocalListingList(b:netrw_curdir, 1)
+        call append(w:netrw_bannercnt - 1, filelist)
+        execute printf("setl ts=%d", g:netrw_maxfilenamelen + 1)
     else " remote
         NetrwKeepj let badresult= s:NetrwRemoteListing()
         if badresult
@@ -8658,21 +8638,6 @@ function s:NetrwLocalListingList(dirname,setmaxfilenamelen)
     endfor
 
     return resultfilelist
-endfunction
-
-"  s:LocalListing: does the job of "ls" for local directories {{{2
-function s:LocalListing()
-
-    let filelist = s:NetrwLocalListingList(b:netrw_curdir, 1)
-    for filename in filelist
-        sil! NetrwKeepj put =filename
-    endfor
-
-    " cleanup any windows mess at end-of-line
-    sil! NetrwKeepj g/^$/d
-    sil! NetrwKeepj %s/\r$//e
-    call histdel("/",-1)
-    exe "setl ts=".(g:netrw_maxfilenamelen+1)
 endfunction
 
 " s:NetrwLocalExecute: uses system() to execute command under cursor ("X" command support) {{{2
