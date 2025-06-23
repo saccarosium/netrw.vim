@@ -57,12 +57,6 @@ if !exists("s:LONGLIST")
   call s:NetrwInit("s:MAXLIST" ,4)
 endif
 
-let s:has_balloon = !has('nvim') &&
-            \ has("balloon_eval") &&
-            \ has("syntax") &&
-            \ exists("g:syntax_on") &&
-            \ !exists("g:netrw_nobeval")
-
 " Default option values: {{{2
 call s:NetrwInit("g:netrw_localcopycmdopt","")
 call s:NetrwInit("g:netrw_localcopydircmdopt","")
@@ -402,12 +396,6 @@ call s:NetrwInit("s:netrw_posn",'{}')
 "  files read by network transfer aren't appropriately highlighted.
 
 "  Netrw Initialization: {{{1
-if s:has_balloon
-  let &l:bexpr = "netrw#BalloonHelp()"
-  au FileType netrw setl beval
-  au WinLeave * if &ft == "netrw" && exists("s:initbeval") | let &beval = s:initbeval | endif
-  au VimEnter * let s:initbeval = &beval
-endif
 
 au WinEnter * if &ft == "netrw" | call s:NetrwInsureWinVars() | endif
 
@@ -419,48 +407,6 @@ else
 endif
 
 "  Netrw Utility Functions: {{{1
-
-" netrw#BalloonHelp: {{{2
-
-if s:has_balloon
-    function netrw#BalloonHelp()
-        if exists("s:popuperr_id") && popup_getpos(s:popuperr_id) != {}
-            if exists("s:popuperr_text") && s:popuperr_text != "" && v:beval_text != s:popuperr_text
-                " text under mouse hasn't changed; only close window when it changes
-                call popup_close(s:popuperr_id)
-                unlet s:popuperr_text
-            else
-                let s:popuperr_text= v:beval_text
-            endif
-            return ""
-
-        elseif v:beval_text == "Netrw" || v:beval_text == "Directory" || v:beval_text == "Listing"
-            return "i: thin-long-wide-tree  gh: quick hide/unhide of dot-files   qf: quick file info  %:open new file"
-
-        elseif getline(v:beval_lnum) =~ '^"\s*/'
-            return "<cr>: edit/enter   o: edit/enter in horiz window   t: edit/enter in new tab   v:edit/enter in vert window"
-
-        elseif v:beval_text == "Sorted" || v:beval_text == "by"
-            return 's: sort by name, time, file size, extension   r: reverse sorting order   mt: mark target'
-
-        elseif v:beval_text == "Sort"   || v:beval_text == "sequence"
-            return "S: edit sorting sequence"
-
-        elseif v:beval_text == "Hiding" || v:beval_text == "Showing"
-            return "a: hiding-showing-all   ctrl-h: editing hiding list   mh: hide/show by suffix"
-
-        elseif v:beval_text == "Quick" || v:beval_text == "Help"
-            return "Help: press <F1>"
-
-        elseif v:beval_text == "Copy/Move" || v:beval_text == "Tgt"
-            return "mt: mark target   mc: copy marked file to target   mm: move marked file to target"
-
-        endif
-
-        return ""
-    endfunction
-endif
-
 " netrw#Explore: launch the local browser in the directory of the current file {{{2
 "          indx:  == -1: Nexplore
 "                 == -2: Pexplore
@@ -3240,11 +3186,6 @@ function s:NetrwBrowse(islocal,dirname)
         endif
     else
         NetrwKeepj call s:SetRexDir(a:islocal,b:netrw_curdir)
-    endif
-
-    if s:has_balloon && &beval == 0 && &l:bexpr == ""
-        let &l:bexpr= "netrw#BalloonHelp()"
-        setl beval
     endif
 
     " repoint t:netrw_lexbufnr if appropriate
@@ -9379,11 +9320,6 @@ function s:NetrwEnew(...)
             endif
         endif
     endif
-
-    if s:has_balloon
-        let &l:bexpr = "netrw#BalloonHelp()"
-    endif
-
 endfunction
 
 " s:NetrwInsureWinVars: insure that a netrw buffer has its w: variables in spite of a wincmd v or s {{{2
