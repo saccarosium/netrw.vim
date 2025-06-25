@@ -4124,104 +4124,30 @@ endfunction
 
 " netrw#BrowseX:  (implements "x") executes a special "viewer" script or program for the {{{2
 "              given filename; typically this means given their extension.
-"              0=local, 1=remote
-function netrw#BrowseX(fname,remote)
-    if a:remote == 1 && a:fname !~ '^https\=:' && a:fname =~ '/$'
-        " remote directory, not a webpage access, looks like an attempt to do a directory listing
-        norm! gf
-    endif
-
-    if exists("g:netrw_browsex_viewer") && exists("g:netrw_browsex_support_remote") && !g:netrw_browsex_support_remote
-        let remote = a:remote
-    else
-        let remote = 0
-    endif
-
-    let ykeep      = @@
-    let screenposn = winsaveview()
-
-    " need to save and restore aw setting as gx can invoke this function from non-netrw buffers
-    let awkeep     = &aw
-    set noaw
-
+function netrw#BrowseX(fname)
     " special core dump handler
-    if a:fname =~ '/core\(\.\d\+\)\=$'
-        if exists("g:Netrw_corehandler")
-            if type(g:Netrw_corehandler) == 2
-                " g:Netrw_corehandler is a function reference (see :help Funcref)
-                call g:Netrw_corehandler(s:NetrwFile(a:fname))
-            elseif type(g:Netrw_corehandler) == 3
-                " g:Netrw_corehandler is a List of function references (see :help Funcref)
-                for Fncref in g:Netrw_corehandler
-                    if type(Fncref) == 2
-                        call Fncref(a:fname)
-                    endif
-                endfor
-            endif
-            call winrestview(screenposn)
-            let @@= ykeep
-            let &aw= awkeep
-            return
+    if a:fname =~ '/core\(\.\d\+\)\=$' && exists("g:Netrw_corehandler")
+        if type(g:Netrw_corehandler) == v:t_func
+            " g:Netrw_corehandler is a function reference (see :help Funcref)
+            call g:Netrw_corehandler(s:NetrwFile(a:fname))
+        elseif type(g:Netrw_corehandler) == v:t_list
+            " g:Netrw_corehandler is a List of function references (see :help Funcref)
+            for Fncref in g:Netrw_corehandler
+                if type(Fncref) == v:t_func
+                    call Fncref(a:fname)
+                endif
+            endfor
         endif
+        return
     endif
 
-    " set up the filename
-    " (lower case the extension, make a local copy of a remote file)
-    let exten= substitute(a:fname,'.*\.\(.\{-}\)','\1','e')
-    if has("win32")
-        let exten= substitute(exten,'^.*$','\L&\E','')
-    endif
-    if exten =~ "[\\/]"
-        let exten= ""
+    let fname = a:fname
+    " special ~ handler for local
+    if fname =~ '^\~' && expand("$HOME") != ""
+        let fname = substitute(fname, '^\~', expand("$HOME"), '')
     endif
 
-    if remote == 1
-        " create a local copy
-        setl bh=delete
-        call netrw#NetRead(3,a:fname)
-        " attempt to rename tempfile
-        let basename= substitute(a:fname,'^\(.*\)/\(.*\)\.\([^.]*\)$','\2','')
-        let newname = substitute(s:netrw_tmpfile,'^\(.*\)/\(.*\)\.\([^.]*\)$','\1/'.basename.'.\3','')
-        if s:netrw_tmpfile != newname && newname != ""
-            if rename(s:netrw_tmpfile,newname) == 0
-                " renaming succeeded
-                let fname= newname
-            else
-                " renaming failed
-                let fname= s:netrw_tmpfile
-            endif
-        else
-            let fname= s:netrw_tmpfile
-        endif
-    else
-        let fname= a:fname
-        " special ~ handler for local
-        if fname =~ '^\~' && expand("$HOME") != ""
-            let fname= s:NetrwFile(substitute(fname,'^\~',expand("$HOME"),''))
-        endif
-    endif
-
-    call netrw#os#Open(fname)
-
-    " cleanup: remove temporary file,
-    "          delete current buffer if success with handler,
-    "          return to prior buffer (directory listing)
-    "          Feb 12, 2008: had to de-activate removal of
-    "          temporary file because it wasn't getting seen.
-    "  if remote == 1 && fname != a:fname
-    "   call s:NetrwDelete(fname)
-    "  endif
-
-    if remote == 1
-        setl bh=delete bt=nofile
-        if g:netrw_use_noswf
-            setl noswf
-        endif
-        exe "sil! NetrwKeepj norm! \<c-o>"
-    endif
-    call winrestview(screenposn)
-    let @@ = ykeep
-    let &aw= awkeep
+    call netrw#os#Open(s:NetrwFile(fname))
 endfunction
 
 " s:NetrwBufRename: renames a buffer without the side effect of retaining an unlisted buffer having the old name {{{2
@@ -4961,7 +4887,7 @@ function s:NetrwMaps(islocal)
         nnoremap <buffer> <silent> <nowait> u        :<c-u>call <SID>NetrwBookHistHandler(4,expand("%"))<cr>
         nnoremap <buffer> <silent> <nowait> U        :<c-u>call <SID>NetrwBookHistHandler(5,expand("%"))<cr>
         nnoremap <buffer> <silent> <nowait> v        :call <SID>NetrwSplit(5)<cr>
-        nnoremap <buffer> <silent> <nowait> x        :<c-u>call netrw#BrowseX(<SID>NetrwBrowseChgDir(1,<SID>NetrwGetWord(),1,0),0)"<cr>
+        nnoremap <buffer> <silent> <nowait> x        :<c-u>call netrw#BrowseX(<SID>NetrwBrowseChgDir(1,<SID>NetrwGetWord(),1,0))"<cr>
         nnoremap <buffer> <silent> <nowait> X        :<c-u>call <SID>NetrwLocalExecute(expand("<cword>"))"<cr>
 
         nnoremap <buffer> <silent> <nowait> r        :<c-u>let g:netrw_sort_direction= (g:netrw_sort_direction =~# 'n')? 'r' : 'n'<bar>exe "norm! 0"<bar>call <SID>NetrwRefresh(1,<SID>NetrwBrowseChgDir(1,'./',0))<cr>
@@ -5074,8 +5000,6 @@ function s:NetrwMaps(islocal)
         nnoremap <buffer> <silent> <nowait> u        :<c-u>call <SID>NetrwBookHistHandler(4,b:netrw_curdir)<cr>
         nnoremap <buffer> <silent> <nowait> U        :<c-u>call <SID>NetrwBookHistHandler(5,b:netrw_curdir)<cr>
         nnoremap <buffer> <silent> <nowait> v        :call <SID>NetrwSplit(2)<cr>
-        nnoremap <buffer> <silent> <nowait> x        :<c-u>call netrw#BrowseX(<SID>NetrwBrowseChgDir(0,<SID>NetrwGetWord(),1),1)<cr>
-        nmap     <buffer>          <nowait> gx       x
         if !hasmapto('<Plug>NetrwHideEdit')
             nmap <buffer> <c-h> <Plug>NetrwHideEdit
         endif
