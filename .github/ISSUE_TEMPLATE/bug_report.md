@@ -11,6 +11,10 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **To Reproduce**
+
+> [!NOTE]
+> Before submitting the issue please read [CONTRIBUTING.md](https://github.com/saccarosium/netrw.vim/blob/main/CONTRIBUTING.md) also make sure that the issue is still present in the upstream version (this git repository). 
+
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
