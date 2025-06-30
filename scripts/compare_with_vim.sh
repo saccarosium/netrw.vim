@@ -65,7 +65,6 @@ update_source_files() {
         'autoload/netrw/fs.vim'
         'autoload/netrw/msg.vim'
         'autoload/netrw/os.vim'
-        'autoload/netrwSettings.vim'
         'autoload/netrw_gitignore.vim'
         'syntax/netrw.vim'
         'plugin/netrwPlugin.vim'

@@ -4,7 +4,7 @@
 
 set -e
 
-FILES='autoload/netrw.vim autoload/netrwSettings.vim plugin/netrwPlugin.vim'
+FILES='autoload/netrw.vim plugin/netrwPlugin.vim'
 
 panic() {
     printf "%s\n" "$1"
