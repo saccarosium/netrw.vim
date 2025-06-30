@@ -1,36 +1,37 @@
-## What happened
+---
+name: Bug report
+about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
 
-<!-- A clear and consise descripition of what is the issue -->
+---
 
-## Steps to Reproduce
+**Describe the bug**
+A clear and concise description of what the bug is.
 
-<!-- Make a bullet list with the step to take to reproduce the issue -->
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
-## Distribution
+**Expected behavior**
+A clear and concise description of what you expected to happen.
 
-<!-- You can check the version by doing `:echo g:loaded_netrw` -->
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
-netrw version:
+**Informations:**
+ - OS: [e.g. Linux|Windows|MacOS]
+ - Netrw Version: [e.g. v182]
+- Netrw Distribution: [vim|neovim|upstream]
 
-- [ ] I'm using the builtin plugin distributed with vim
-- [ ] I'm using the builtin plugin distributed with neovim
-- [ ] I'm using the upstream plugin
-
-## n(vim) version
-
-<!-- Put the output of `vim --version` or `nvim -v` -->
+**n(nvim) version**
 
 ```
 vim --version
+or
+nvim --version
 ```
-
-## Operating System
-
-- [ ] Linux
-- [ ] MacOS
-- [ ] Windows
-- [ ] Windows WSL
-- [ ] Windows Cygwin
-- [ ] BSD
-- [ ] Amiga
-
