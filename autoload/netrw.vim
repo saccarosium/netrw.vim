@@ -4876,8 +4876,6 @@ function s:NetrwMaps(islocal)
         nnoremap <buffer> <silent> <nowait> P        :<c-u>call <SID>NetrwPrevWinOpen(1)<cr>
         nnoremap <buffer> <silent> <nowait> qb       :<c-u>call <SID>NetrwBookHistHandler(2,b:netrw_curdir)<cr>
         nnoremap <buffer> <silent> <nowait> qf       :<c-u>call <SID>NetrwFileInfo(1,<SID>NetrwGetWord())<cr>
-        nnoremap <buffer> <silent> <nowait> qF       :<c-u>call <SID>NetrwMarkFileQFEL(1,getqflist())<cr>
-        nnoremap <buffer> <silent> <nowait> qL       :<c-u>call <SID>NetrwMarkFileQFEL(1,getloclist(v:count))<cr>
         nnoremap <buffer> <silent> <nowait> s        :call <SID>NetrwSortStyle(1)<cr>
         nnoremap <buffer> <silent> <nowait> S        :<c-u>call <SID>NetSortSequence(1)<cr>
         nnoremap <buffer> <silent> <nowait> Tb       :<c-u>call <SID>NetrwSetTgt(1,'b',v:count1)<cr>
@@ -4987,8 +4985,6 @@ function s:NetrwMaps(islocal)
         nnoremap <buffer> <silent> <nowait> P        :<c-u>call <SID>NetrwPrevWinOpen(0)<cr>
         nnoremap <buffer> <silent> <nowait> qb       :<c-u>call <SID>NetrwBookHistHandler(2,b:netrw_curdir)<cr>
         nnoremap <buffer> <silent> <nowait> qf       :<c-u>call <SID>NetrwFileInfo(0,<SID>NetrwGetWord())<cr>
-        nnoremap <buffer> <silent> <nowait> qF       :<c-u>call <SID>NetrwMarkFileQFEL(0,getqflist())<cr>
-        nnoremap <buffer> <silent> <nowait> qL       :<c-u>call <SID>NetrwMarkFileQFEL(0,getloclist(v:count))<cr>
         nnoremap <buffer> <silent> <nowait> r        :<c-u>let g:netrw_sort_direction= (g:netrw_sort_direction =~# 'n')? 'r' : 'n'<bar>exe "norm! 0"<bar>call <SID>NetrwBrowse(0,<SID>NetrwBrowseChgDir(0,'./',0))<cr>
         nnoremap <buffer> <silent> <nowait> s        :call <SID>NetrwSortStyle(0)<cr>
         nnoremap <buffer> <silent> <nowait> S        :<c-u>call <SID>NetSortSequence(0)<cr>
@@ -5551,30 +5547,6 @@ function s:NetrwMarkFileEdit(islocal)
 
 endfunction
 
-" s:NetrwMarkFileQFEL: convert a quickfix-error or location list into a marked file list {{{2
-function s:NetrwMarkFileQFEL(islocal,qfel)
-    call s:NetrwUnmarkAll()
-    let curbufnr= bufnr("%")
-
-    if !empty(a:qfel)
-        for entry in a:qfel
-            let bufnmbr= entry["bufnr"]
-            if !exists("s:netrwmarkfilelist_{curbufnr}")
-                call s:NetrwMarkFile(a:islocal,bufname(bufnmbr))
-            elseif index(s:netrwmarkfilelist_{curbufnr},bufname(bufnmbr)) == -1
-                " s:NetrwMarkFile will remove duplicate entries from the marked file list.
-                " So, this test lets two or more hits on the same pattern to be ignored.
-                call s:NetrwMarkFile(a:islocal,bufname(bufnmbr))
-            else
-            endif
-        endfor
-        echo "(use me to edit marked files)"
-    else
-        call netrw#msg#Notify('WARNING', "can't convert quickfix error list; its empty!")
-    endif
-
-endfunction
-
 " s:NetrwMarkFileExe: (invoked by mx and mX) execute arbitrary system command on marked files {{{2
 "                     mx enbloc=0: Uses the local marked-file list, applies command to each file individually
 "                     mX enbloc=1: Uses the global marked-file list, applies command to entire list
@@ -5812,14 +5784,6 @@ function s:NetrwMarkFileGrep(islocal)
 
     2match none
     NetrwKeepj call winrestview(svpos)
-
-    if exists("nonisi")
-        " original, user-supplied pattern did not begin with a character from isident
-        if pat =~# nonisi.'j$\|'.nonisi.'gj$\|'.nonisi.'jg$'
-            call s:NetrwMarkFileQFEL(a:islocal,getqflist())
-        endif
-    endif
-
 endfunction
 
 " s:NetrwMarkFileMove: (invoked by mm) execute arbitrary command on marked files, one at a time {{{2

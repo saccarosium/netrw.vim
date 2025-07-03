@@ -75,8 +75,6 @@ Copyright: Copyright (C) 2017 Charles E Campbell    *netrw-copyright*
       Making The Browsing Directory The Current Directory.|netrw-cd|
       Marking Files.......................................|netrw-mf|
       Unmarking Files.....................................|netrw-mF|
-      Marking Files By Location List......................|netrw-qL|
-      Marking Files By QuickFix List......................|netrw-qF|
       Marking Files By Regular Expression.................|netrw-mr|
       Marked Files: Arbitrary Shell Command...............|netrw-mx|
       Marked Files: Arbitrary Shell Command, En Bloc......|netrw-mX|
@@ -1080,8 +1078,6 @@ QUICK REFERENCE: MAPS				*netrw-browse-maps* {{{2
 	   P	Browse in the previously used window                 |netrw-P|
 	   qb	List bookmarked directories and history              |netrw-qb|
 	   qf	Display information on file                          |netrw-qf|
-	   qF	Mark files using a quickfix list                     |netrw-qF|
-	   qL	Mark files using a |location-list|                     |netrw-qL|
 	   r	Reverse sorting order                                |netrw-r|
 	   R	Rename the designated file(s)/directory(ies)         |netrw-R|
 	   s	Select sorting style: by name, time, or file size    |netrw-s|
@@ -1980,11 +1976,6 @@ Netrw provides several ways to mark files:
 
 	* Mark files using the |argument-list| (|netrw-mA|)
 
-	* Mark files based upon a |location-list| (|netrw-qL|)
-
-	* Mark files based upon the quickfix list (|netrw-qF|)
-	  (|quickfix-error-lists|)
-
 The following netrw maps make use of marked files:
 
     |netrw-a|	Hide marked files/directories
@@ -2048,21 +2039,6 @@ UNMARKING FILES							*netrw-mF* {{{2
 
 The "mF" command will unmark all files in the current buffer.  One may also use
 mf (|netrw-mf|) on a specific, already marked, file to unmark just that file.
-
-MARKING FILES BY LOCATION LIST					*netrw-qL* {{{2
-	(also see |netrw-mf|)
-
-One may convert |location-list|s into a marked file list using "qL".
-You may then proceed with commands such as me (|netrw-me|) to edit them.
-
-
-MARKING FILES BY QUICKFIX LIST					*netrw-qF* {{{2
-	(also see |netrw-mf|)
-
-One may convert |quickfix-error-lists| into a marked file list using "qF".
-You may then proceed with commands such as me (|netrw-me|) to edit them.
-Quickfix error lists are generated, for example, by calls to |:vimgrep|.
-
 
 MARKING FILES BY REGULAR EXPRESSION				*netrw-mr* {{{2
 	(also see |netrw-mf|)
@@ -2143,7 +2119,7 @@ MARKED FILES: ARGUMENT LIST				*netrw-ma* *netrw-mA*
 Using ma, one moves filenames from the marked file list to the argument list.
 Using mA, one moves filenames from the argument list to the marked file list.
 
-See Also: |netrw-cb| |netrw-cB| |netrw-qF| |argument-list| |:args|
+See Also: |netrw-cb| |netrw-cB| |argument-list| |:args|
 
 
 MARKED FILES: BUFFER LIST				*netrw-cb* *netrw-cB*
@@ -2153,7 +2129,7 @@ MARKED FILES: BUFFER LIST				*netrw-cb* *netrw-cB*
 Using cb, one moves  filenames from the marked file list to the buffer list.
 Using cB, one copies filenames from the buffer list to the marked file list.
 
-See Also: |netrw-ma| |netrw-mA| |netrw-qF| |buffer-list| |:buffers|
+See Also: |netrw-ma| |netrw-mA| |buffer-list| |:buffers|
 
 
 MARKED FILES: COMPRESSION AND DECOMPRESSION		*netrw-mz* {{{2
