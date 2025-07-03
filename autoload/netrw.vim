@@ -4861,7 +4861,6 @@ function s:NetrwMaps(islocal)
         nnoremap <buffer> <silent> <nowait> mg       :<c-u>call <SID>NetrwMarkFileGrep(1)<cr>
         nnoremap <buffer> <silent> <nowait> mh       :<c-u>call <SID>NetrwMarkHideSfx(1)<cr>
         nnoremap <buffer> <silent> <nowait> mm       :<c-u>call <SID>NetrwMarkFileMove(1)<cr>
-        nnoremap <buffer> <silent> <nowait> mp       :<c-u>call <SID>NetrwMarkFilePrint(1)<cr>
         nnoremap <buffer> <silent> <nowait> mr       :<c-u>call <SID>NetrwMarkFileRegexp(1)<cr>
         nnoremap <buffer> <silent> <nowait> ms       :<c-u>call <SID>NetrwMarkFileSource(1)<cr>
         nnoremap <buffer> <silent> <nowait> mT       :<c-u>call <SID>NetrwMarkFileTag(1)<cr>
@@ -4973,7 +4972,6 @@ function s:NetrwMaps(islocal)
         nnoremap <buffer> <silent> <nowait> mg       :<c-u>call <SID>NetrwMarkFileGrep(0)<cr>
         nnoremap <buffer> <silent> <nowait> mh       :<c-u>call <SID>NetrwMarkHideSfx(0)<cr>
         nnoremap <buffer> <silent> <nowait> mm       :<c-u>call <SID>NetrwMarkFileMove(0)<cr>
-        nnoremap <buffer> <silent> <nowait> mp       :<c-u>call <SID>NetrwMarkFilePrint(0)<cr>
         nnoremap <buffer> <silent> <nowait> mr       :<c-u>call <SID>NetrwMarkFileRegexp(0)<cr>
         nnoremap <buffer> <silent> <nowait> ms       :<c-u>call <SID>NetrwMarkFileSource(0)<cr>
         nnoremap <buffer> <silent> <nowait> mT       :<c-u>call <SID>NetrwMarkFileTag(0)<cr>
@@ -5932,39 +5930,6 @@ function s:NetrwMarkFileMove(islocal)
 
 endfunction
 
-" s:NetrwMarkFilePrint: (invoked by mp) This function prints marked files {{{2
-"                       using the hardcopy command.  Local marked-file list only.
-function s:NetrwMarkFilePrint(islocal)
-    let curbufnr= bufnr("%")
-
-    " sanity check
-    if !exists("s:netrwmarkfilelist_{curbufnr}") || empty(s:netrwmarkfilelist_{curbufnr})
-        call netrw#msg#Notify('ERROR', 'there are no marked files in this window (:help netrw-mf)')
-        return
-    endif
-    let curdir= s:NetrwGetCurdir(a:islocal)
-
-    if exists("s:netrwmarkfilelist_{curbufnr}")
-        let netrwmarkfilelist = s:netrwmarkfilelist_{curbufnr}
-        call s:NetrwUnmarkList(curbufnr,curdir)
-        for fname in netrwmarkfilelist
-            if a:islocal
-                if g:netrw_keepdir
-                    let fname= netrw#fs#ComposePath(curdir,fname)
-                endif
-            else
-                let fname= curdir.fname
-            endif
-            1split
-            " the autocmds will handle both local and remote files
-            exe "sil NetrwKeepj e ".fnameescape(fname)
-            hardcopy
-            q
-        endfor
-        2match none
-    endif
-endfunction
-
 " s:NetrwMarkFileRegexp: (invoked by mr) This function is used to mark {{{2
 "                        files when given a regexp (for which a prompt is
 "                        issued) (matches to name of files).
@@ -6425,7 +6390,6 @@ function s:NetrwMenu(domenu)
             exe 'sil! menu '.g:NetrwMenuPriority.'.14.8   '.g:NetrwTopLvlMenu.'Marked\ Files.Exe\ Cmd<tab>mx    mx'
             exe 'sil! menu '.g:NetrwMenuPriority.'.14.9   '.g:NetrwTopLvlMenu.'Marked\ Files.Move\ To\ Target<tab>mm    mm'
             exe 'sil! menu '.g:NetrwMenuPriority.'.14.10  '.g:NetrwTopLvlMenu.'Marked\ Files.Obtain<tab>O       O'
-            exe 'sil! menu '.g:NetrwMenuPriority.'.14.11  '.g:NetrwTopLvlMenu.'Marked\ Files.Print<tab>mp       mp'
             exe 'sil! menu '.g:NetrwMenuPriority.'.14.12  '.g:NetrwTopLvlMenu.'Marked\ Files.Replace<tab>R      R'
             exe 'sil! menu '.g:NetrwMenuPriority.'.14.13  '.g:NetrwTopLvlMenu.'Marked\ Files.Set\ Target<tab>mt mt'
             exe 'sil! menu '.g:NetrwMenuPriority.'.14.14  '.g:NetrwTopLvlMenu.'Marked\ Files.Tag<tab>mT mT'
