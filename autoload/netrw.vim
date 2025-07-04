@@ -6124,37 +6124,20 @@ endfunction
 
 " s:NetrwOpenFile: query user for a filename and open it {{{2
 function s:NetrwOpenFile(islocal)
-    let ykeep= @@
     call inputsave()
-    let fname= input("Enter filename: ")
+    let fname = input("Enter filename: ")
     call inputrestore()
 
-    " determine if Lexplore is in use
-    if exists("t:netrw_lexbufnr")
-        " check if t:netrw_lexbufnr refers to a netrw window
-        let lexwinnr = bufwinnr(t:netrw_lexbufnr)
-        if lexwinnr != -1 && exists("g:netrw_chgwin") && g:netrw_chgwin != -1
-            exe "NetrwKeepj keepalt ".g:netrw_chgwin."wincmd w"
-            exe "NetrwKeepj e ".fnameescape(fname)
-            let @@= ykeep
-        endif
+    if empty(fname)
+        return
     endif
 
-    " Does the filename contain a path?
-    if fname !~ '[/\\]'
-        if exists("b:netrw_curdir")
-            " save position for benefit of Rexplore
-            let s:rexposn_{bufnr("%")}= winsaveview()
-            if b:netrw_curdir =~ '/$'
-                exe "NetrwKeepj e ".fnameescape(b:netrw_curdir.fname)
-            else
-                exe "e ".fnameescape(b:netrw_curdir."/".fname)
-            endif
-        endif
-    else
-        exe "NetrwKeepj e ".fnameescape(fname)
-    endif
-    let @@= ykeep
+    " save position for benefit of Rexplore
+    let s:rexposn_{bufnr("%")}= winsaveview()
+
+    execute "NetrwKeepj e " . fnameescape(!isabsolutepath(fname)
+                \ ? netrw#fs#ComposePath(b:netrw_curdir, fname)
+                \ : fname)
 endfunction
 
 " netrw#Shrink: shrinks/expands a netrw or Lexplorer window {{{2
